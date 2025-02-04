@@ -14,40 +14,46 @@ function encodeDndId(x: number, y: number): string {
 	return `${x},${y}`
 }
 
+function createBlockStyle(x: number, y: number, board: SharedValue<Board>): any {
+	const animatedStyle = useAnimatedStyle(() => {
+		const block = board.value[y][x];
+		let style: any;
+		if (block.blockType == BoardBlockType.FILLED || block.blockType == BoardBlockType.HOVERED) {
+			style = {
+				...createFilledBlockStyle(block.color),
+				opacity: block.blockType == BoardBlockType.HOVERED ? 0.3 : 1,
+			}
+		} else if (block.blockType == BoardBlockType.HOVERED_BREAK_EMPTY || block.blockType == BoardBlockType.HOVERED_BREAK_FILLED) {
+			const blockColor = block.blockType == BoardBlockType.HOVERED_BREAK_EMPTY ? block.color : block.hoveredBreakColor;
+			style = {
+				...createFilledBlockStyle(blockColor),
+				shadowColor: colorToHex(blockColor),
+				shadowOffset: {width: 0, height: 0},
+				shadowOpacity: 1,
+				shadowRadius: 14,
+				opacity: 1,
+			}
+		} else {
+			style = createEmptyBlockStyle();
+		}
+		
+		return style;
+	});
+	return animatedStyle;
+}
+
 export default function BlockGrid({board, possibleBoardDropSpots}: BlockGridProps) {
 	const blocks = [];
 	for (let y = 0; y < 8; y++) {
 		for (let x = 0; x < 8; x++) {
-			const animatedStyle = useAnimatedStyle(() => {
-				const block = board.value[y][x];
-				let style: any;
-				if (block.blockType == BoardBlockType.FILLED || block.blockType == BoardBlockType.HOVERED) {
-					style = {
-						...createFilledBlockStyle(block.color),
-						opacity: block.blockType == BoardBlockType.HOVERED ? 0.3 : 1,
-					}
-				} else if (block.blockType == BoardBlockType.HOVERED_BREAK_EMPTY || block.blockType == BoardBlockType.HOVERED_BREAK_FILLED) {
-					const blockColor = block.blockType == BoardBlockType.HOVERED_BREAK_EMPTY ? block.color : block.hoveredBreakColor;
-					style = {
-						...createFilledBlockStyle(blockColor),
-						shadowColor: colorToHex(blockColor),
-						shadowOffset: {width: 0, height: 0},
-						shadowOpacity: 1,
-						shadowRadius: 14,
-						opacity: 1,
-					}
-				} else {
-					style = createEmptyBlockStyle();
-				}
-				
-				return style;
-			});
+			const animatedStyle = createBlockStyle(x, y, board);
 			const blockPositionStyle = {
 				position: 'absolute',
 				top: y * GRID_BLOCK_SIZE,
 				left: x * GRID_BLOCK_SIZE,
 			}
 
+			// used to set the size of the droppable to 0 (pieces cannot be dropped on this block)
 			const createStyle = () => {
 				"worklet";
 				const active = possibleBoardDropSpots.value[y][x] == 1;

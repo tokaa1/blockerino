@@ -56,6 +56,8 @@ export const Game = React.memo(() => {
 	const [loaded] = useFonts({
 		'Press-Start-2P': require('../assets/fonts/PressStart2P-Regular.ttf'),
 		SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+		Silkscreen: require('../assets/fonts/Silkscreen-Regular.ttf'),
+		SilkscreenBold: require('../assets/fonts/Silkscreen-Bold.ttf')
 	});
 	if (!loaded)
 		return null;

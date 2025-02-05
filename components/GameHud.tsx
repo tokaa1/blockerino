@@ -24,9 +24,9 @@ export default function GameHud({ score, combo, lastBrokenLine }: GameHudProps) 
 			<View style={styles.scoreContainer}>
 				<AnimatedNumbers includeComma={false} animateToNumber={scoreState} animationDuration={700} fontStyle={{
 					color: 'white',
-					fontFamily: 'SpaceMono',
+					fontFamily: 'Silkscreen',
 					fontSize: 50,
-					fontWeight: '900',
+					fontWeight: '100',
 					textShadowColor: 'rgb(0, 0, 0)',
 					textShadowOffset: { width: 3, height: 3 },
 					textShadowRadius: 10
@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
 	},
 	hudLabel: {
 		color: 'white',
-		fontFamily: 'SpaceMono',
+		fontFamily: 'Silkscreen',
 		fontWeight: '900',
 		fontSize: 30,
 		marginLeft: 2,

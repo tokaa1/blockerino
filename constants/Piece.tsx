@@ -195,10 +195,10 @@ export const piecesData: PieceDataSaved[] = [
 ];
 
 const pieceColors = [
-	{r: 161, g: 3, b: 252},
-	{r: 242, g: 197, b: 48},
-	{r: 42, g: 23, b: 209},
-	{r: 176, g: 14, b: 55}
+	{ r: 161, g: 3, b: 252 },
+	{ r: 242, g: 197, b: 48 },
+	{ r: 42, g: 23, b: 209 },
+	{ r: 176, g: 14, b: 55 }
 ]
 
 export function getBlockCount(piece: PieceData): number {
@@ -206,7 +206,7 @@ export function getBlockCount(piece: PieceData): number {
 	let count = 0;
 	for (let y = 0; y < piece.matrix.length; y++) {
 		for (let x = 0; x < piece.matrix[0].length; x++) {
-			if (piece.matrix[y][x] == 1) 
+			if (piece.matrix[y][x] == 1)
 				count++;
 		}
 	}
@@ -234,26 +234,26 @@ export function getRandomPieceWorklet(): PieceData {
 
 function getBorderColors(backgroundColor: Color) {
 	"worklet";
-	const {r, g, b} = backgroundColor;
+	const { r, g, b } = backgroundColor;
 
 	// multipliers calculated from a screenshot
 	const multipliers = {
-			borderTopColor: { r: 214 / 131, g: 167 / 83, b: 247 / 203 },
-			borderLeftColor: { r: 164 / 131, g: 119 / 83, b: 224 / 203 },
-			borderRightColor: { r: 123 / 131, g: 69 / 83, b: 153 / 203 },
-			borderBottomColor: { r: 92 / 131, g: 43 / 83, b: 132 / 203 }
+		borderTopColor: { r: 214 / 131, g: 167 / 83, b: 247 / 203 },
+		borderLeftColor: { r: 164 / 131, g: 119 / 83, b: 224 / 203 },
+		borderRightColor: { r: 123 / 131, g: 69 / 83, b: 153 / 203 },
+		borderBottomColor: { r: 92 / 131, g: 43 / 83, b: 132 / 203 }
 	};
 
 	const clamp = (value: number) => Math.min(Math.max(Math.round(value), 0), 255);
 
-	const computeColor = (mult: any) => 
-			`rgb(${clamp(r * mult.r)}, ${clamp(g * mult.g)}, ${clamp(b * mult.b)})`;
+	const computeColor = (mult: any) =>
+		`rgb(${clamp(r * mult.r)}, ${clamp(g * mult.g)}, ${clamp(b * mult.b)})`;
 
 	return {
-			borderTopColor: computeColor(multipliers.borderTopColor),
-			borderLeftColor: computeColor(multipliers.borderLeftColor),
-			borderRightColor: computeColor(multipliers.borderRightColor),
-			borderBottomColor: computeColor(multipliers.borderBottomColor)
+		borderTopColor: computeColor(multipliers.borderTopColor),
+		borderLeftColor: computeColor(multipliers.borderLeftColor),
+		borderRightColor: computeColor(multipliers.borderRightColor),
+		borderBottomColor: computeColor(multipliers.borderBottomColor)
 	};
 }
 

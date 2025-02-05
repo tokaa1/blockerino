@@ -11,14 +11,14 @@ interface GameHudProps {
 }
 
 export default function GameHud({ score, combo, lastBrokenLine }: GameHudProps) {
-	const [ scoreState, setScoreState ] = useState(0);
-	
+	const [scoreState, setScoreState] = useState(0);
+
 	useAnimatedReaction(() => {
 		return score.value;
 	}, (currentValue, previousValue) => {
 		runOnJS(setScoreState)(currentValue);
 	})
-	
+
 	return (
 		<View style={styles.hudContainer}>
 			<View style={styles.scoreContainer}>
@@ -28,9 +28,9 @@ export default function GameHud({ score, combo, lastBrokenLine }: GameHudProps) 
 					fontSize: 50,
 					fontWeight: '900',
 					textShadowColor: 'rgb(0, 0, 0)',
-					textShadowOffset: {width: 3, height: 3},
+					textShadowOffset: { width: 3, height: 3 },
 					textShadowRadius: 10
-				}}/>
+				}} />
 			</View>
 			<ComboBar lastBrokenLine={lastBrokenLine}></ComboBar>
 		</View>

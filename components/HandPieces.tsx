@@ -9,7 +9,7 @@ interface HandProps {
 	hand: SharedValue<Hand>
 }
 
-export default function HandPieces({hand}: HandProps) {
+export default function HandPieces({ hand }: HandProps) {
 	const handPieces = [];
 	for (let i = 0; i < 3; i++) {
 		// we'll make a 5x5 grid to store the piece data to come
@@ -26,7 +26,7 @@ export default function HandPieces({hand}: HandProps) {
 					}
 					const pieceHeight = piece.matrix.length;
 					const pieceWidth = piece.matrix[0].length;
-					
+
 					let style = {};
 					if (x > pieceWidth - 1 || y > pieceHeight - 1 || piece.matrix[y][x] == 0) {
 						style = {
@@ -123,7 +123,7 @@ interface PieceDraggableProps {
 	hand: any
 }
 
-function PieceDraggable({children, id, createStyle, hand, ...otherProps}: PieceDraggableProps) {
+function PieceDraggable({ children, id, createStyle, hand, ...otherProps }: PieceDraggableProps) {
 	const { props, offset, state, setNodeLayout } = useDraggable({
 		id,
 	});

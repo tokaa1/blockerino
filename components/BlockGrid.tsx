@@ -28,7 +28,7 @@ function createBlockStyle(x: number, y: number, board: SharedValue<Board>): any 
 			style = {
 				...createFilledBlockStyle(blockColor),
 				shadowColor: colorToHex(blockColor),
-				shadowOffset: {width: 0, height: 0},
+				shadowOffset: { width: 0, height: 0 },
 				shadowOpacity: 1,
 				shadowRadius: 14,
 				opacity: 1,
@@ -36,13 +36,13 @@ function createBlockStyle(x: number, y: number, board: SharedValue<Board>): any 
 		} else {
 			style = createEmptyBlockStyle();
 		}
-		
+
 		return style;
 	});
 	return animatedStyle;
 }
 
-export default function BlockGrid({board, possibleBoardDropSpots}: BlockGridProps) {
+export default function BlockGrid({ board, possibleBoardDropSpots }: BlockGridProps) {
 	const blocks = [];
 	for (let y = 0; y < 8; y++) {
 		for (let x = 0; x < 8; x++) {
@@ -69,7 +69,7 @@ export default function BlockGrid({board, possibleBoardDropSpots}: BlockGridProp
 					};
 				}
 			}
-			
+
 			blocks.push((
 				<Animated.View key={`${x},${y}`} style={[styles.emptyBlock, blockPositionStyle as any, animatedStyle]}>
 					<BlockDroppable id={encodeDndId(x, y)} createStyle={createStyle} style={styles.hitbox} deps={possibleBoardDropSpots}>
@@ -89,7 +89,7 @@ interface BlockDroppableProps {
 	deps: any
 }
 
-function BlockDroppable({children, id, createStyle, style, deps, ...otherProps}: BlockDroppableProps) {
+function BlockDroppable({ children, id, createStyle, style, deps, ...otherProps }: BlockDroppableProps) {
 	const { props, activeId } = useDroppable({
 		id
 	});
@@ -105,7 +105,7 @@ function BlockDroppable({children, id, createStyle, style, deps, ...otherProps}:
 		// 20ms should be good (> 1000ms/60)
 		setTimeout(() => {
 			(props.onLayout as any)(null);
-		}, 1000/60);
+		}, 1000 / 60);
 	}
 
 	const animatedStyle = useAnimatedStyle(() => {

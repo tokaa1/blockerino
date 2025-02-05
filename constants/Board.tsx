@@ -30,7 +30,7 @@ export type Board = BoardBlock[][]
 export function newEmptyBoard(): Board {
 	return new Array(8).fill(null).map(() => {
 		return new Array(8).fill(null).map(() => {
-			return {blockType: BoardBlockType.EMPTY, color: {r: 0, g: 0, b: 0}, hoveredBreakColor: {r: 0, g: 0, b: 0}};
+			return { blockType: BoardBlockType.EMPTY, color: { r: 0, g: 0, b: 0 }, hoveredBreakColor: { r: 0, g: 0, b: 0 } };
 		})
 	})
 }

@@ -1,5 +1,5 @@
 # blockerino: 8x8 grid, break lines!
-Blockerino is a web and mobile Block Blast-style puzzle game where you place blocks on an 8x8 grid and clear lines to score points.
+Blockerino is a web and mobile Block Blast-style puzzle game where you place blocks on an 8x8 (or N x N) grid and clear lines to score points.
 
 Plan your moves carefully and aim for high scores!
 

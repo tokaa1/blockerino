@@ -89,8 +89,8 @@ export const Game = React.memo(() => {
 			const piece: PieceData = hand.value[draggingPiece.value!]!;
 			const pieceHeight = piece.matrix.length;
 			const pieceWidth = piece.matrix[0].length;
-			if (dropX + pieceWidth - 1 > 7 || dropY + pieceHeight - 1 > 7)
-				return;
+			//if (dropX + pieceWidth - 1 > 7 || dropY + pieceHeight - 1 > 7)
+				//return;
 
 			// the block is gonna fit, let's place the block
 			// we'll do the haptics now
@@ -172,8 +172,8 @@ export const Game = React.memo(() => {
 		const piece: PieceData = hand.value[draggingPiece.value!]!;
 		const pieceHeight = piece.matrix.length;
 		const pieceWidth = piece.matrix[0].length;
-		if (dropX + pieceWidth - 1 > 7 || dropY + pieceHeight - 1 > 7)
-			return;
+		//if (dropX + pieceWidth - 1 > 7 || dropY + pieceHeight - 1 > 7)
+		//	return;
 
 		const newBoard = clearHoverBlocks([...board.value]);
 		updateHoveredBreaks(newBoard, piece, dropX, dropY);

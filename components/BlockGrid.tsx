@@ -54,9 +54,9 @@ export default function BlockGrid({ board, possibleBoardDropSpots }: BlockGridPr
 			}
 
 			// used to set the size of the droppable to 0 (pieces cannot be dropped on this block)
-			const createStyle = () => {
+			const createStyle = (possibleBoardDropSpots: PossibleBoardSpots) => {
 				"worklet";
-				const active = possibleBoardDropSpots.value[y][x] == 1;
+				const active = possibleBoardDropSpots[y][x] == 1;
 				if (active) {
 					return {
 						width: HITBOX_SIZE,
@@ -72,7 +72,7 @@ export default function BlockGrid({ board, possibleBoardDropSpots }: BlockGridPr
 
 			blocks.push((
 				<Animated.View key={`${x},${y}`} style={[styles.emptyBlock, blockPositionStyle as any, animatedStyle]}>
-					<BlockDroppable id={encodeDndId(x, y)} createStyle={createStyle} style={styles.hitbox} deps={possibleBoardDropSpots}>
+					<BlockDroppable id={encodeDndId(x, y)} createStyle={createStyle} style={styles.hitbox} possibleBoardDropSpots={possibleBoardDropSpots}>
 					</BlockDroppable>
 				</Animated.View>
 			))
@@ -84,12 +84,12 @@ export default function BlockGrid({ board, possibleBoardDropSpots }: BlockGridPr
 interface BlockDroppableProps {
 	children?: any,
 	id: string,
-	createStyle: () => object,
+	createStyle: (deps: PossibleBoardSpots) => object,
 	style: any,
-	deps: any
+	possibleBoardDropSpots: SharedValue<PossibleBoardSpots>
 }
 
-function BlockDroppable({ children, id, createStyle, style, deps, ...otherProps }: BlockDroppableProps) {
+function BlockDroppable({ children, id, createStyle, style, possibleBoardDropSpots, ...otherProps }: BlockDroppableProps) {
 	const { props, activeId } = useDroppable({
 		id
 	});
@@ -109,11 +109,10 @@ function BlockDroppable({ children, id, createStyle, style, deps, ...otherProps 
 	}
 
 	const animatedStyle = useAnimatedStyle(() => {
-		deps;
 		runOnJS(updateLayout)();
-		const style = createStyle();
+		const style = createStyle(possibleBoardDropSpots.value);
 		return style;
-	}, [props, deps]);
+	}, [props]);
 
 	return (
 		<Animated.View {...props} style={[style, animatedStyle]} {...otherProps}>

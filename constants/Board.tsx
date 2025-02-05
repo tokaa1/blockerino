@@ -6,6 +6,8 @@ export const HAND_BLOCK_SIZE = 22;
 export const HITBOX_SIZE = 12;
 export const DRAG_JUMP_LENGTH = 150;
 
+export const BOARD_LENGTH = 8;
+
 export interface XYPoint {
 	x: number,
 	y: number
@@ -28,8 +30,8 @@ export interface BoardBlock {
 export type Board = BoardBlock[][]
 
 export function newEmptyBoard(): Board {
-	return new Array(8).fill(null).map(() => {
-		return new Array(8).fill(null).map(() => {
+	return new Array(BOARD_LENGTH).fill(null).map(() => {
+		return new Array(BOARD_LENGTH).fill(null).map(() => {
 			return { blockType: BoardBlockType.EMPTY, color: { r: 0, g: 0, b: 0 }, hoveredBreakColor: { r: 0, g: 0, b: 0 } };
 		})
 	})
@@ -39,8 +41,8 @@ export type PossibleBoardSpots = number[][];
 
 export function emptyPossibleBoardSpots(): PossibleBoardSpots {
 	"worklet";
-	return new Array(8).fill(null).map(() => {
-		return new Array(8).fill(null).map(() => {
+	return new Array(BOARD_LENGTH).fill(null).map(() => {
+		return new Array(BOARD_LENGTH).fill(null).map(() => {
 			return 0;
 		})
 	});
@@ -48,8 +50,8 @@ export function emptyPossibleBoardSpots(): PossibleBoardSpots {
 
 
 export function JS_emptyPossibleBoardSpots(): PossibleBoardSpots {
-	return new Array(8).fill(null).map(() => {
-		return new Array(8).fill(null).map(() => {
+	return new Array(BOARD_LENGTH).fill(null).map(() => {
+		return new Array(BOARD_LENGTH).fill(null).map(() => {
 			return 0;
 		})
 	});
@@ -64,8 +66,8 @@ export function createPossibleBoardSpots(board: Board, piece: PieceData | null):
 	const pieceWidth = piece.matrix[0].length;
 	const fitPositions: PossibleBoardSpots = emptyPossibleBoardSpots();
 
-	for (let boardY = 0; boardY <= 8 - pieceHeight; boardY++) {
-		for (let boardX = 0; boardX <= 8 - pieceWidth; boardX++) {
+	for (let boardY = 0; boardY <= BOARD_LENGTH - pieceHeight; boardY++) {
+		for (let boardX = 0; boardX <= BOARD_LENGTH - pieceWidth; boardX++) {
 			let canFit = true;
 
 			for (let pieceY = 0; pieceY < pieceHeight; pieceY++) {
@@ -89,8 +91,8 @@ export function createPossibleBoardSpots(board: Board, piece: PieceData | null):
 
 export function clearHoverBlocks(board: Board): Board {
 	"worklet";
-	for (let y = 0; y < 8; y++) {
-		for (let x = 0; x < 8; x++) {
+	for (let y = 0; y < BOARD_LENGTH; y++) {
+		for (let x = 0; x < BOARD_LENGTH; x++) {
 			const blockType = board[y][x].blockType;
 			if (blockType == BoardBlockType.HOVERED || blockType == BoardBlockType.HOVERED_BREAK_EMPTY) {
 				board[y][x].blockType = BoardBlockType.EMPTY;
@@ -122,13 +124,13 @@ export function updateHoveredBreaks(board: Board, piece: PieceData, dropX: numbe
 	const rowsToClear = new Set<number>();
 	const colsToClear = new Set<number>();
 
-	for (let row = 0; row < 8; row++) {
+	for (let row = 0; row < BOARD_LENGTH; row++) {
 		if (tempBoard[row].every(cell => cell.blockType == BoardBlockType.FILLED || cell.blockType == BoardBlockType.HOVERED)) {
 			rowsToClear.add(row);
 		}
 	}
 
-	for (let col = 0; col < 8; col++) {
+	for (let col = 0; col < BOARD_LENGTH; col++) {
 		if (tempBoard.every(row => row[col].blockType == BoardBlockType.FILLED || row[col].blockType == BoardBlockType.HOVERED)) {
 			colsToClear.add(col);
 		}
@@ -138,7 +140,7 @@ export function updateHoveredBreaks(board: Board, piece: PieceData, dropX: numbe
 
 	if (count > 0) {
 		rowsToClear.forEach(row => {
-			for (let col = 0; col < 8; col++) {
+			for (let col = 0; col < BOARD_LENGTH; col++) {
 				if (board[row][col].blockType == BoardBlockType.FILLED) {
 					board[row][col].blockType = BoardBlockType.HOVERED_BREAK_FILLED;
 					board[row][col].hoveredBreakColor = piece.color;
@@ -149,7 +151,7 @@ export function updateHoveredBreaks(board: Board, piece: PieceData, dropX: numbe
 		});
 
 		colsToClear.forEach(col => {
-			for (let row = 0; row < 8; row++) {
+			for (let row = 0; row < BOARD_LENGTH; row++) {
 				if (board[row][col].blockType == BoardBlockType.FILLED) {
 					board[row][col].blockType = BoardBlockType.HOVERED_BREAK_FILLED;
 					board[row][col].hoveredBreakColor = piece.color;
@@ -166,13 +168,13 @@ export function breakLines(board: Board): number {
 	const rowsToClear = new Set<number>();
 	const colsToClear = new Set<number>();
 
-	for (let row = 0; row < 8; row++) {
+	for (let row = 0; row < BOARD_LENGTH; row++) {
 		if (board[row].every(cell => cell.blockType == BoardBlockType.FILLED)) {
 			rowsToClear.add(row);
 		}
 	}
 
-	for (let col = 0; col < 8; col++) {
+	for (let col = 0; col < BOARD_LENGTH; col++) {
 		if (board.every(row => row[col].blockType == BoardBlockType.FILLED)) {
 			colsToClear.add(col);
 		}
@@ -182,13 +184,13 @@ export function breakLines(board: Board): number {
 
 	if (count > 0) {
 		rowsToClear.forEach(row => {
-			for (let col = 0; col < 8; col++) {
+			for (let col = 0; col < BOARD_LENGTH; col++) {
 				board[row][col].blockType = BoardBlockType.EMPTY;
 			}
 		});
 
 		colsToClear.forEach(col => {
-			for (let row = 0; row < 8; row++) {
+			for (let row = 0; row < BOARD_LENGTH; row++) {
 				board[row][col].blockType = BoardBlockType.EMPTY;
 			}
 		});

@@ -1,4 +1,4 @@
-import { GRID_BLOCK_SIZE } from "@/constants/Board"
+import { BOARD_LENGTH, GRID_BLOCK_SIZE } from "@/constants/Board"
 import { useRef, useState } from "react"
 import { StyleSheet, Text, View } from "react-native"
 import Animated, { SharedValue, runOnJS, useAnimatedReaction, useAnimatedStyle, useDerivedValue, withTiming } from "react-native-reanimated"
@@ -58,7 +58,7 @@ function ComboBar({ lastBrokenLine }: ComboBarProps) {
 
 const styles = StyleSheet.create({
 	hudContainer: {
-		width: GRID_BLOCK_SIZE * 8 + 8,
+		width: GRID_BLOCK_SIZE * BOARD_LENGTH + 8,
 		height: 120,
 		justifyContent: 'center',
 		alignItems: 'center'

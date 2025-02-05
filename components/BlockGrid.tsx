@@ -1,4 +1,4 @@
-import { Board, BoardBlockType, GRID_BLOCK_SIZE, HAND_BLOCK_SIZE, HITBOX_SIZE, PossibleBoardSpots } from "@/constants/Board";
+import { BOARD_LENGTH, Board, BoardBlockType, GRID_BLOCK_SIZE, HAND_BLOCK_SIZE, HITBOX_SIZE, PossibleBoardSpots } from "@/constants/Board";
 import { colorToHex } from "@/constants/Color";
 import { createEmptyBlockStyle, createFilledBlockStyle } from "@/constants/Piece";
 import { useDroppable } from "@mgcrea/react-native-dnd";
@@ -44,8 +44,8 @@ function createBlockStyle(x: number, y: number, board: SharedValue<Board>): any 
 
 export default function BlockGrid({ board, possibleBoardDropSpots }: BlockGridProps) {
 	const blocks = [];
-	for (let y = 0; y < 8; y++) {
-		for (let x = 0; x < 8; x++) {
+	for (let y = 0; y < BOARD_LENGTH; y++) {
+		for (let x = 0; x < BOARD_LENGTH; x++) {
 			const animatedStyle = createBlockStyle(x, y, board);
 			const blockPositionStyle = {
 				position: 'absolute',
@@ -134,8 +134,8 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 	},
 	grid: {
-		width: GRID_BLOCK_SIZE * 8 + 8,
-		height: GRID_BLOCK_SIZE * 8 + 8,
+		width: GRID_BLOCK_SIZE * BOARD_LENGTH + 8,
+		height: GRID_BLOCK_SIZE * BOARD_LENGTH + 8,
 		position: 'relative',
 		borderWidth: 4,
 		borderColor: 'rgb(40, 40, 40)'

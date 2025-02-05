@@ -7,7 +7,7 @@ import Animated, { ReduceMotion, SharedValue, dispatchCommand, runOnJS, runOnUI,
 import * as Haptics from 'expo-haptics';
 import { useFonts } from 'expo-font';
 import { Color, colorToHex } from '@/constants/Color';
-import { Board, BoardBlockType, DRAG_JUMP_LENGTH, GRID_BLOCK_SIZE, HAND_BLOCK_SIZE, HITBOX_SIZE, JS_emptyPossibleBoardSpots, PossibleBoardSpots, XYPoint, breakLines, clearHoverBlocks, createPossibleBoardSpots, emptyPossibleBoardSpots, newEmptyBoard, updateHoveredBreaks } from '@/constants/Board';
+import { BOARD_LENGTH, Board, BoardBlockType, DRAG_JUMP_LENGTH, GRID_BLOCK_SIZE, HAND_BLOCK_SIZE, HITBOX_SIZE, JS_emptyPossibleBoardSpots, PossibleBoardSpots, XYPoint, breakLines, clearHoverBlocks, createPossibleBoardSpots, emptyPossibleBoardSpots, newEmptyBoard, placePieceOntoBoard, updateHoveredBreaks } from '@/constants/Board';
 import GameHud from '@/components/GameHud';
 import BlockGrid from '@/components/BlockGrid';
 import { createRandomHand, createRandomHandWorklet } from '@/constants/Hand';
@@ -98,14 +98,7 @@ export const Game = React.memo(() => {
 				runPiecePlacedHaptic();
 
 			const newBoard = clearHoverBlocks([...board.value]);
-			for (let y = 0; y < piece.matrix.length; y++) {
-				for (let x = 0; x < piece.matrix[0].length; x++) {
-					if (piece.matrix[y][x] == 1) {
-						newBoard[dropY + y][dropX + x].blockType = BoardBlockType.FILLED;
-						newBoard[dropY + y][dropX + x].color = piece.color;
-					}
-				}
-			}
+			placePieceOntoBoard(newBoard, piece, dropX, dropY, BoardBlockType.FILLED)
 			const linesBroken = breakLines(newBoard);
 			// add score from placing block
 			const pieceBlockCount = getBlockCount(piece);
@@ -115,7 +108,7 @@ export const Game = React.memo(() => {
 				combo.value += linesBroken;
 				
 				// line break score with combo
-				runOnJS(addScoreWithTimeout)(200, linesBroken * 8 * combo.value * pieceBlockCount);
+				runOnJS(addScoreWithTimeout)(200, linesBroken * BOARD_LENGTH * combo.value * pieceBlockCount);
 			} else {
 				lastBrokenLine.value++;
 				if (lastBrokenLine.value >= 3) {

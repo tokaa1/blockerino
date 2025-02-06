@@ -6,7 +6,7 @@ export const HAND_BLOCK_SIZE = 22;
 export const HITBOX_SIZE = 12;
 export const DRAG_JUMP_LENGTH = 150;
 
-export const BOARD_LENGTH = 8;
+export const BOARD_LENGTH = 10;
 
 export interface XYPoint {
 	x: number,

@@ -194,7 +194,7 @@ export const piecesData: PieceDataSaved[] = [
 	},
 ];
 
-const pieceColors = [
+export const pieceColors = [
 	{ r: 161, g: 3, b: 252 },
 	{ r: 242, g: 197, b: 48 },
 	{ r: 42, g: 23, b: 209 },

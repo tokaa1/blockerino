@@ -1,210 +1,240 @@
-import { PieceData, createFilledBlockStyle, getBlockCount, getRandomPiece, getRandomPieceWorklet } from '@/constants/Piece';
-import { DndProvider, DndProviderProps, Draggable, Droppable, Rectangle, SharedPoint, useDraggable, useDroppable } from '@mgcrea/react-native-dnd';
-import React, { useRef, useEffect, DependencyList } from 'react';
-import { LayoutChangeEvent, Platform, SafeAreaView, StyleSheet, Text, View } from 'react-native';
-import { GestureHandlerRootView, State } from 'react-native-gesture-handler';
-import Animated, { ReduceMotion, SharedValue, dispatchCommand, runOnJS, runOnUI, useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
-import * as Haptics from 'expo-haptics';
-import { useFonts } from 'expo-font';
-import { Color, colorToHex } from '@/constants/Color';
-import { BOARD_LENGTH, Board, BoardBlockType, DRAG_JUMP_LENGTH, GRID_BLOCK_SIZE, HAND_BLOCK_SIZE, HITBOX_SIZE, JS_emptyPossibleBoardSpots, PossibleBoardSpots, XYPoint, breakLines, clearHoverBlocks, createPossibleBoardSpots, emptyPossibleBoardSpots, newEmptyBoard, placePieceOntoBoard, updateHoveredBreaks } from '@/constants/Board';
-import GameHud from '@/components/GameHud';
-import BlockGrid from '@/components/BlockGrid';
-import { createRandomHand, createRandomHandWorklet } from '@/constants/Hand';
-import HandPieces from '@/components/HandPieces';
+import { useEffect } from "react"
+import { View, Text, TouchableOpacity, StyleSheet, Dimensions, Touchable, Pressable } from "react-native"
+import { useFonts } from "expo-font"
+import Animated, {
+	useSharedValue,
+	useAnimatedStyle,
+	withTiming,
+	withRepeat,
+	withSequence,
+	withDelay,
+	withSpring,
+	Easing,
+} from "react-native-reanimated"
+import { createFilledBlockStyle, getRandomPiece } from "@/constants/Piece"
 
-// layout = active/dragging
-const pieceOverlapsRectangle = (layout: Rectangle, other: Rectangle) => {
-	"worklet";
-	if (other.width == 0 && other.height == 0) {
-		return false;
-	}
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-	return (
-		layout.x < other.x + other.width &&
-		layout.x + GRID_BLOCK_SIZE > other.x &&
-		layout.y < other.y + other.height &&
-		layout.y + GRID_BLOCK_SIZE > other.y
-	);
-};
+const { width, height } = Dimensions.get("window");
 
-const SPRING_CONFIG_MISSED_DRAG = {
-	mass: 1,
-	damping: 1,
-	stiffness: 500,
-	overshootClamping: true,
-	restDisplacementThreshold: 0.01,
-	restSpeedThreshold: 0.01,
-	reduceMotion: ReduceMotion.Never,
-}
+const colors = ["#FF3333", "#FF00FF", "#00FF00", "#00FF00"];
 
-function decodeDndId(id: string): XYPoint {
-	"worklet";
-	return {x: Number(id[0]), y: Number(id[2])}
-}
-
-function impactAsyncHelper(style: Haptics.ImpactFeedbackStyle) {
-	Haptics.impactAsync(style);
-}
-
-function runPiecePlacedHaptic() {
-	"worklet";
-	runOnJS(impactAsyncHelper)(Haptics.ImpactFeedbackStyle.Light);
-}
-
-export const Game = React.memo(() => {
+export default function App() {
 	const [loaded] = useFonts({
 		'Press-Start-2P': require('../assets/fonts/PressStart2P-Regular.ttf'),
 		SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
 		Silkscreen: require('../assets/fonts/Silkscreen-Regular.ttf'),
 		SilkscreenBold: require('../assets/fonts/Silkscreen-Bold.ttf')
 	});
+
+	const logoOpacity = useSharedValue(0)
+	const logoTranslateY = useSharedValue(-50)
+
+	useEffect(() => {
+		logoOpacity.value = withTiming(1, { duration: 500 })
+		logoTranslateY.value = withTiming(0, { duration: 500 })
+	}, [])
+
+	const logoAnimatedStyle = useAnimatedStyle(() => ({
+		opacity: logoOpacity.value,
+		transform: [{ translateY: logoTranslateY.value }],
+	}))
+	
 	if (!loaded)
 		return null;
-	
-	const board = useSharedValue(newEmptyBoard());
-	const draggingPiece = useSharedValue<number | null>(null);
-	const possibleBoardDropSpots = useSharedValue<PossibleBoardSpots>(JS_emptyPossibleBoardSpots());
-	const hand = useSharedValue(createRandomHand());
-	const score = useSharedValue(0);
-	const combo = useSharedValue(0);
-	// How many moves ago was the last broken line?
-	const lastBrokenLine = useSharedValue(3);
-	
-	const addScoreWithTimeout = (timeout: number, scoreDelta: number) => {
-		setTimeout(() => {
-			score.value += scoreDelta;
-		}, timeout);
-	}
 
-	const handleDragEnd: DndProviderProps["onDragEnd"] = ({ active, over }) => {
-		"worklet";
-		if (over) {
-			if (draggingPiece.value == null) {
-				return;
-			}
+	return (
+		<View style={styles.container}>
+			{[...Array(25)].map((_, i) => (
+				<PieceParticle key={i}/>
+			))}
 
-			const dropIdStr = over.id.toString();
-			const {x: dropX, y: dropY} = decodeDndId(dropIdStr);
-			const piece: PieceData = hand.value[draggingPiece.value!]!;
-			const pieceHeight = piece.matrix.length;
-			const pieceWidth = piece.matrix[0].length;
-			//if (dropX + pieceWidth - 1 > 7 || dropY + pieceHeight - 1 > 7)
-				//return;
+			<Animated.Text style={[styles.logo, logoAnimatedStyle]}>blockerino</Animated.Text>
 
-			// the block is gonna fit, let's place the block
-			// we'll do the haptics now
-			if (Platform.OS != 'web')
-				runPiecePlacedHaptic();
+			<MainButton backgroundColor={colors[0]} title={"Classic ∞"} flavorText={"classical line breaking"} idleBounce={true}/>
+			<MainButton backgroundColor={'#000000'} title={"Chaos !?"} flavorText={"10x10, 5 piece hand!?"} style={{borderWidth: 2, borderColor: 'rgb(50, 50, 50)'}} textStyle={{color: 'white'}} idleBounceRotate={true}/>
+			<MainButton backgroundColor={colors[1]} title={"High Scores"}/>
+			<MainButton backgroundColor={colors[2]} title={"Options"}/>
 
-			const newBoard = clearHoverBlocks([...board.value]);
-			placePieceOntoBoard(newBoard, piece, dropX, dropY, BoardBlockType.FILLED)
-			const linesBroken = breakLines(newBoard);
-			// add score from placing block
-			const pieceBlockCount = getBlockCount(piece);
-			score.value += pieceBlockCount;
-			if (linesBroken > 0) {
-				lastBrokenLine.value = 0;
-				combo.value += linesBroken;
-				
-				// line break score with combo
-				runOnJS(addScoreWithTimeout)(200, linesBroken * BOARD_LENGTH * combo.value * pieceBlockCount);
-			} else {
-				lastBrokenLine.value++;
-				if (lastBrokenLine.value >= 3) {
-					combo.value = 0;
-				}
-			}
-			
-			const newHand = [...hand.value];
-			newHand[draggingPiece.value!] = null;
-
-			// is hand empty?
-			let empty = true
-			for (let i = 0; i < 3; i++) {
-				if (newHand[i] != null) {
-					empty = false;
-					break;
-				}
-			}
-			if (empty) {
-				hand.value = createRandomHandWorklet();
-			} else {
-				hand.value = newHand;
-			}
-			board.value = newBoard;
-		} else {
-			board.value = clearHoverBlocks([...board.value]);
-		}
-		draggingPiece.value = null;
-		possibleBoardDropSpots.value = emptyPossibleBoardSpots();
-	};
-
-	const handleBegin: DndProviderProps["onBegin"] = (event, meta) => {
-		"worklet";
-		const handIndex = Number(meta.activeId.toString());
-		if (hand.value[handIndex] != null) {
-			draggingPiece.value = handIndex;
-			possibleBoardDropSpots.value = createPossibleBoardSpots(board.value, hand.value[handIndex]);
-		}
-	};
-
-	const handleFinalize: DndProviderProps["onFinalize"] = ({ state }) => {
-		"worklet";
-		if (state !== State.FAILED) {
-			
-		}
-	};
-
-	const handleUpdate: DndProviderProps["onUpdate"] = (event, {activeId, activeLayout, droppableActiveId}) => {
-		"worklet";
-		if (!droppableActiveId) {
-			board.value = clearHoverBlocks([...board.value]);
-			return;
-		}
-
-		if (draggingPiece.value == null) {
-			return;
-		}
-
-		const dropIdStr = droppableActiveId.toString();
-		const {x: dropX, y: dropY} = decodeDndId(dropIdStr);
-		const piece: PieceData = hand.value[draggingPiece.value!]!;
-		const pieceHeight = piece.matrix.length;
-		const pieceWidth = piece.matrix[0].length;
-		//if (dropX + pieceWidth - 1 > 7 || dropY + pieceHeight - 1 > 7)
-		//	return;
-
-		const newBoard = clearHoverBlocks([...board.value]);
-		updateHoveredBreaks(newBoard, piece, dropX, dropY);
-
-		board.value = newBoard
-	}
-	
-	return (        
-		<View style={styles.root}>
-			<SafeAreaView style={styles.root}>
-				<GestureHandlerRootView style={styles.root}>
-					<DndProvider shouldDropWorklet={pieceOverlapsRectangle} springConfig={SPRING_CONFIG_MISSED_DRAG} onBegin={handleBegin} onFinalize={handleFinalize} onDragEnd={handleDragEnd} onUpdate={handleUpdate}>
-						<GameHud score={score} combo={combo} lastBrokenLine={lastBrokenLine}></GameHud>
-						<BlockGrid board={board} possibleBoardDropSpots={possibleBoardDropSpots}></BlockGrid>
-						<HandPieces hand={hand}></HandPieces>
-					</DndProvider>
-				</GestureHandlerRootView>
-			</SafeAreaView>
+			<Text style={styles.footer}>development version</Text>
 		</View>
+	)
+}
+
+function MainButton({style, textStyle, backgroundColor, title, flavorText, idleBounce, idleBounceRotate, onClick}: {style?: any, textStyle?: any, backgroundColor: string, title: string, flavorText?: string, idleBounce?: boolean, idleBounceRotate?: boolean, onClick?: () => void}) {
+	const translateY = useSharedValue(0);
+	const rotationDeg = useSharedValue(0);
+	
+	const animatedStyle = useAnimatedStyle(() => {
+		return {
+			transform: [{ translateY: translateY.value }, {rotate: `${rotationDeg.value}deg`}],
+		}
+	})
+	
+	useEffect(() => {
+		const idleBounceTotalTime = 3700;
+		if (idleBounce) {
+			translateY.value = withRepeat(
+				withSequence(
+					withDelay(2500, withTiming(-30, { duration: 200 })),
+					withTiming(0, { duration: 1000, easing: Easing.bounce})	
+				),
+			1000);
+		} else if (idleBounceRotate) {
+			const amplitude = 10;
+			const steps = 5;
+			const stepDuration = 160;
+			const anims = [];
+			for (let i = 0; i < steps; i++) {
+				let deg;
+				if (i == steps - 1) {
+					deg = 0
+				} else {
+					deg = i % 2 == 0 ? -amplitude : amplitude;
+				}
+				anims.push(withTiming(deg, { duration: stepDuration, easing: Easing.cubic }));
+			}
+			
+			rotationDeg.value = withRepeat(
+				withDelay(idleBounceTotalTime - stepDuration * steps, withSequence(
+					...anims
+				)),
+			1000)
+		}
+	}, [])
+	
+	return (
+		<AnimatedPressable onPress={onClick ? onClick : () => {}} key={title} style={[styles.button, { backgroundColor }, animatedStyle, style ? style : {}]}>
+			<Text style={[styles.buttonText, textStyle ? textStyle : {}]}>{title}</Text>
+			{flavorText &&
+				<Text style={[styles.buttonFlavorText, textStyle ? textStyle : {}]}>{flavorText}</Text>
+			}
+		</AnimatedPressable>
+	)
+}
+
+function PieceParticle() {
+	const randomX = Math.random() * width;
+	const randomY = Math.random() * height;
+	const randomDelay = Math.random() * 5000;
+	
+	const randomTargetX = 0;
+	const randomTargetY = (Math.random() * 50) - 150;
+
+	const opacity = useSharedValue(0);
+	const translateXOffset = useSharedValue(0);
+	const translateYOffset = useSharedValue(0);
+
+	useEffect(() => {
+		opacity.value = withRepeat(
+			withSequence(
+				withDelay(randomDelay, withTiming(1, { duration: 1000 })),
+				withTiming(0, { duration: 1000 })
+			),
+			-1
+		);
+
+		translateYOffset.value = withRepeat(
+			withSequence(
+				withDelay(randomDelay, withTiming(randomTargetY, { duration: 2000 })),
+				withTiming(0, { duration: 0 })
+			),
+			-1
+		);
+		
+		translateXOffset.value = withRepeat(
+			withSequence(
+				withDelay(randomDelay, withTiming(randomTargetX, { duration: 2000 })),
+				withTiming(0, { duration: 0 })
+			),
+			-1
+		);
+	}, [opacity, translateYOffset, randomDelay]);
+
+	const animatedStyle = useAnimatedStyle(() => ({
+		opacity: opacity.value,
+		transform: [{ translateY: translateYOffset.value }, { translateX: translateXOffset.value }],
+	}));
+	
+	const particleBlockSize = 28;
+	const piece = getRandomPiece();
+	const pieceHeight = piece.matrix.length;
+	const pieceWidth = piece.matrix[0].length;
+	const pieceBlocks = [];
+	
+	for (let y = 0; y < pieceHeight; y++) {
+		for (let x = 0; x < pieceWidth; x++) {
+			if (piece.matrix[y][x] == 1) {
+				const blockStyle = {
+					width: particleBlockSize,
+					height: particleBlockSize,
+					top: y * particleBlockSize,
+					left: x * particleBlockSize,
+					position: 'absolute',
+					opacity: 0.8	
+				}
+				pieceBlocks.push(<View key={`${x},${y}`}style={[createFilledBlockStyle(piece.color), blockStyle]}>
+				</View>)
+			}
+		}
+	}
+
+	return (
+		<Animated.View
+			style={[
+				{
+					position: "absolute",
+					width: particleBlockSize * pieceWidth,
+					height: particleBlockSize * pieceHeight,
+					left: randomX,
+					top: randomY,
+				},
+				animatedStyle,
+			]}
+		>
+			{pieceBlocks}
+		</Animated.View>
 	);
-})
+};
 
 const styles = StyleSheet.create({
-	root: {
+	container: {
 		flex: 1,
-		justifyContent: 'center',
-		alignItems: 'center',
-		backgroundColor: '#130617',
-		padding: 0,
-		overflow: 'hidden'
-	}
+		backgroundColor: "black",
+		alignItems: "center",
+		justifyContent: "center",
+	},
+	logo: {
+		fontFamily: "Silkscreen",
+		fontSize: 40,
+		color: "#FFF",
+		marginBottom: 50,
+		textAlign: "center",
+	},
+	button: {
+		width: "80%",
+		height: 60,
+		justifyContent: "center",
+		alignItems: "center",
+		marginBottom: 20,
+		borderRadius: 10,
+		maxWidth: 420
+	},
+	buttonText: {
+		fontFamily: "Silkscreen",
+		fontSize: 24,
+		color: "black",
+	},
+	buttonFlavorText: {
+		fontFamily: "Silkscreen",
+		fontSize: 14,
+		color: "rgb(30, 30, 30)",
+	},
+	footer: {
+		fontFamily: "Silkscreen",
+		fontSize: 16,
+		color: "#555",
+		position: "absolute",
+		bottom: 20,
+	},
 })
-
-export default Game;

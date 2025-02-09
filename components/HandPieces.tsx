@@ -3,17 +3,19 @@ import { Hand } from "@/constants/Hand";
 import { createFilledBlockStyle } from "@/constants/Piece";
 import { SharedPoint, useDraggable } from "@mgcrea/react-native-dnd";
 import { StyleSheet, View } from "react-native";
-import Animated, { SharedValue, runOnJS, useAnimatedStyle } from "react-native-reanimated";
+import Animated, { SharedValue, runOnJS, useAnimatedStyle, withSequence, withTiming } from "react-native-reanimated";
 
 interface HandProps {
 	hand: SharedValue<Hand>
 }
 
 export default function HandPieces({ hand }: HandProps) {
+	const handSize = hand.value.length;
 	const handPieces = [];
-	for (let i = 0; i < 3; i++) {
+	for (let i = 0; i < handSize; i++) {
 		// we'll make a 5x5 grid to store the piece data to come
 		const pieceBlocks = [];
+		// create all blocks
 		for (let y = 0; y < 5; y++) {
 			for (let x = 0; x < 5; x++) {
 				const animatedStyle = useAnimatedStyle(() => {
@@ -51,7 +53,7 @@ export default function HandPieces({ hand }: HandProps) {
 
 		const id = String(i)
 
-		// anyyyyyyyy...
+		// style of the piece div
 		const animatedStyle = (sleeping: boolean, dragging: boolean, acting: boolean, offset: SharedPoint, hand: Hand) => {
 			"worklet";
 			const piece = hand[i];
@@ -97,7 +99,7 @@ export default function HandPieces({ hand }: HandProps) {
 					},
 					{
 						scale: dragging ? 1 : HAND_BLOCK_SIZE / GRID_BLOCK_SIZE
-					}
+					},
 				]
 			};
 
@@ -164,11 +166,18 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 		alignItems: 'center',
 		flexDirection: 'row',
-		position: 'relative'
+		position: 'relative',
+		marginTop: 40,
+		maxWidth: HAND_BLOCK_SIZE * 5 * 3,
+		maxHeight: HAND_BLOCK_SIZE * 5 * 2,
+		height: HAND_BLOCK_SIZE * 6,
+		flexWrap: 'wrap',
+		alignSelf: 'center',
+		flex: 1,
 	},
 	piece: {
 		width: HAND_BLOCK_SIZE * 5,
-		height: HAND_BLOCK_SIZE * 5 + 80,
+		height: HAND_BLOCK_SIZE * 5,
 		position: 'relative',
 		justifyContent: 'center',
 		alignItems: 'center'

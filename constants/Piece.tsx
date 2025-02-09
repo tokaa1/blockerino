@@ -2,7 +2,7 @@ import { Color, colorToHex } from "./Color";
 
 export interface PieceData {
 	matrix: number[][];
-	difficultyRatio: number;
+	distributionPoints: number;
 	color: Color;
 }
 
@@ -11,7 +11,7 @@ export interface PieceData {
 // so we will use this one to store piece shape and info
 interface PieceDataSaved {
 	matrix: number[][];
-	difficultyRatio: number
+	distributionPoints: number
 }
 
 export const piecesData: PieceDataSaved[] = [
@@ -21,7 +21,7 @@ export const piecesData: PieceDataSaved[] = [
 			[1, 0, 0],
 			[1, 1, 1],
 		],
-		difficultyRatio: 0.5,
+		distributionPoints: 2,
 
 	},
 	{
@@ -30,7 +30,7 @@ export const piecesData: PieceDataSaved[] = [
 			[1, 0],
 			[1, 0],
 		],
-		difficultyRatio: 0.5,
+		distributionPoints: 2,
 
 	},
 	{
@@ -38,7 +38,7 @@ export const piecesData: PieceDataSaved[] = [
 			[1, 1, 1],
 			[0, 0, 1],
 		],
-		difficultyRatio: 0.5,
+		distributionPoints: 2,
 
 	},
 	{
@@ -47,7 +47,7 @@ export const piecesData: PieceDataSaved[] = [
 			[0, 1],
 			[1, 1],
 		],
-		difficultyRatio: 0.5,
+		distributionPoints: 2,
 
 	},
 	{
@@ -55,7 +55,7 @@ export const piecesData: PieceDataSaved[] = [
 			[0, 0, 1],
 			[1, 1, 1],
 		],
-		difficultyRatio: 0.5,
+		distributionPoints: 2,
 
 	},
 	{
@@ -64,7 +64,7 @@ export const piecesData: PieceDataSaved[] = [
 			[1, 0],
 			[1, 1],
 		],
-		difficultyRatio: 0.5,
+		distributionPoints: 2,
 
 	},
 	{
@@ -72,7 +72,7 @@ export const piecesData: PieceDataSaved[] = [
 			[1, 1, 1],
 			[1, 0, 0],
 		],
-		difficultyRatio: 0.5,
+		distributionPoints: 2,
 
 	},
 	{
@@ -81,7 +81,7 @@ export const piecesData: PieceDataSaved[] = [
 			[0, 1],
 			[0, 1],
 		],
-		difficultyRatio: 0.5,
+		distributionPoints: 2,
 
 	},
 	// Triangle shape
@@ -90,7 +90,7 @@ export const piecesData: PieceDataSaved[] = [
 			[1, 1, 1],
 			[0, 1, 0],
 		],
-		difficultyRatio: 0.5,
+		distributionPoints: 1.5,
 
 	},
 	{
@@ -99,7 +99,7 @@ export const piecesData: PieceDataSaved[] = [
 			[1, 1],
 			[1, 0],
 		],
-		difficultyRatio: 0.5,
+		distributionPoints: 1.5,
 
 	},
 	{
@@ -107,7 +107,7 @@ export const piecesData: PieceDataSaved[] = [
 			[0, 1, 0],
 			[1, 1, 1],
 		],
-		difficultyRatio: 0.5,
+		distributionPoints: 1.5,
 
 	},
 	{
@@ -116,7 +116,7 @@ export const piecesData: PieceDataSaved[] = [
 			[1, 1],
 			[0, 1],
 		],
-		difficultyRatio: 0.5,
+		distributionPoints: 1.5,
 
 	},
 	// Z/S shape
@@ -125,7 +125,7 @@ export const piecesData: PieceDataSaved[] = [
 			[0, 1, 1],
 			[1, 1, 0],
 		],
-		difficultyRatio: 0.5,
+		distributionPoints: 1,
 
 	},
 	{
@@ -134,7 +134,7 @@ export const piecesData: PieceDataSaved[] = [
 			[1, 1],
 			[0, 1],
 		],
-		difficultyRatio: 0.5,
+		distributionPoints: 1,
 
 	},
 	{
@@ -142,7 +142,7 @@ export const piecesData: PieceDataSaved[] = [
 			[1, 1, 0],
 			[0, 1, 1],
 		],
-		difficultyRatio: 0.5,
+		distributionPoints: 1,
 
 	},
 	{
@@ -151,7 +151,7 @@ export const piecesData: PieceDataSaved[] = [
 			[1, 1],
 			[1, 0],
 		],
-		difficultyRatio: 0.5,
+		distributionPoints: 1,
 
 	},
 	// 3x3
@@ -161,7 +161,7 @@ export const piecesData: PieceDataSaved[] = [
 			[1, 1, 1],
 			[1, 1, 1],
 		],
-		difficultyRatio: 0.5,
+		distributionPoints: 3,
 
 	},
 	// 2x2
@@ -170,7 +170,7 @@ export const piecesData: PieceDataSaved[] = [
 			[1, 1],
 			[1, 1],
 		],
-		difficultyRatio: 0.5,
+		distributionPoints: 6,
 
 	},
 	// 4x1
@@ -181,24 +181,55 @@ export const piecesData: PieceDataSaved[] = [
 			[1],
 			[1],
 		],
-		difficultyRatio: 0.5,
-
+		distributionPoints: 2,
 	},
 	// 1x4
 	{
 		matrix: [
 			[1, 1, 1, 1],
 		],
-		difficultyRatio: 0.5,
-
+		distributionPoints: 2,
+	},
+	// 3x1
+	{
+		matrix: [
+			[1],
+			[1],
+			[1],
+		],
+		distributionPoints: 10,
+	},
+	// 1x3
+	{
+		matrix: [
+			[1, 1, 1],
+		],
+		distributionPoints: 10,
+	},
+	// 2x1
+	{
+		matrix: [
+			[1],
+			[1],
+		],
+		distributionPoints: 15,
+	},
+	// 1x2
+	{
+		matrix: [
+			[1, 1],
+		],
+		distributionPoints: 15,
 	},
 ];
 
 export const pieceColors = [
-	{ r: 161, g: 3, b: 252 },
-	{ r: 242, g: 197, b: 48 },
-	{ r: 42, g: 23, b: 209 },
-	{ r: 176, g: 14, b: 55 }
+	{ r: 227, g: 143, b: 16 },
+	{ r: 186, g: 19, b: 38 },
+	{ r: 16, g: 158, b: 40 },
+	{ r: 20, g: 56, b: 184 },
+	{ r: 101, g: 19, b: 148 },
+	{ r: 31, g: 165, b: 222 }
 ]
 
 export function getBlockCount(piece: PieceData): number {
@@ -213,22 +244,49 @@ export function getBlockCount(piece: PieceData): number {
 	return count;
 }
 
+const totalDistributionPoints = piecesData.reduce((sum, piece) => sum + piece.distributionPoints, 0);
+
+export function getRandomPieceColor(): Color {
+	return pieceColors[Math.floor(Math.random() * pieceColors.length)];
+}
+
+export function getRandomPieceColorWorklet(): Color {
+	"worklet";
+	return pieceColors[Math.floor(Math.random() * pieceColors.length)];
+}
+
 export function getRandomPiece(): PieceData {
-	let piece = piecesData[Math.floor(Math.random() * piecesData.length)];
+	let position = Math.random() * totalDistributionPoints;
+	let piece: PieceDataSaved;
+	for (let i = 0; i < piecesData.length; i++) {
+		position -= piecesData[i].distributionPoints;
+		if (position < 0) {
+			piece = piecesData[i];
+			break;
+		}
+	}
 
 	return {
-		...piece,
-		color: pieceColors[Math.floor(Math.random() * pieceColors.length)]
+		...piece!,
+		color: getRandomPieceColor()
 	};
 }
 
 export function getRandomPieceWorklet(): PieceData {
 	"worklet";
-	let piece = piecesData[Math.floor(Math.random() * piecesData.length)];
+	let position = Math.random() * totalDistributionPoints;
+	let piece: PieceDataSaved;
+	for (let i = 0; i < piecesData.length; i++) {
+		position -= piecesData[i].distributionPoints;
+		if (position < 0) {
+			piece = piecesData[i];
+			break;
+		}
+	}
 
 	return {
-		...piece,
-		color: pieceColors[Math.floor(Math.random() * pieceColors.length)]
+		...piece!,
+		color: getRandomPieceColorWorklet()
 	};
 }
 
@@ -273,14 +331,14 @@ export function createEmptyBlockStyle(): object {
 	"worklet";
 	const borderColor = 'rgb(40, 40, 40)';
 	return {
-		backgroundColor: 'rgb(0, 0, 0)',
+		backgroundColor: 'rgba(0, 0, 0, 0)',
 		borderColor: borderColor,
 		borderLeftColor: borderColor,
 		borderTopColor: borderColor,
 		borderRightColor: borderColor,
 		borderBottomColor: borderColor,
 		opacity: 1,
-		borderWidth: 0.5,
+		borderWidth: 0.25,
 		borderRadius: 0,
 		boxSizing: 'border-box',
 		boxShadow: 'none',

@@ -7,11 +7,13 @@ import Animated, { ReduceMotion, SharedValue, dispatchCommand, runOnJS, runOnUI,
 import * as Haptics from 'expo-haptics';
 import { useFonts } from 'expo-font';
 import { Color, colorToHex } from '@/constants/Color';
-import { BOARD_LENGTH, Board, BoardBlockType, DRAG_JUMP_LENGTH, GRID_BLOCK_SIZE, HAND_BLOCK_SIZE, HITBOX_SIZE, JS_emptyPossibleBoardSpots, PossibleBoardSpots, XYPoint, breakLines, clearHoverBlocks, createPossibleBoardSpots, emptyPossibleBoardSpots, newEmptyBoard, placePieceOntoBoard, updateHoveredBreaks } from '@/constants/Board';
-import GameHud from '@/components/GameHud';
+import { Board, BoardBlockType, DRAG_JUMP_LENGTH, GRID_BLOCK_SIZE, HAND_BLOCK_SIZE, HITBOX_SIZE, JS_emptyPossibleBoardSpots, PossibleBoardSpots, XYPoint, breakLines, clearHoverBlocks, createPossibleBoardSpots, emptyPossibleBoardSpots, newEmptyBoard, placePieceOntoBoard, updateHoveredBreaks } from '@/constants/Board';
+import { StatsGameHud, StickyGameHud } from '@/components/GameHud';
 import BlockGrid from '@/components/BlockGrid';
 import { createRandomHand, createRandomHandWorklet } from '@/constants/Hand';
 import HandPieces from '@/components/HandPieces';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useAudioPlayer } from 'expo-audio';
 
 // layout = active/dragging
 const pieceOverlapsRectangle = (layout: Rectangle, other: Rectangle) => {
@@ -52,15 +54,22 @@ function runPiecePlacedHaptic() {
 	runOnJS(impactAsyncHelper)(Haptics.ImpactFeedbackStyle.Light);
 }
 
-export const Game = React.memo(() => {
-	const board = useSharedValue(newEmptyBoard());
+export enum GameMode {
+	Classic,
+	Chaos
+}
+
+export const Game = (({gameMode}: {gameMode: GameMode}) => {
+	const boardLength = gameMode == GameMode.Chaos ? 10 : 8;
+	const handSize = gameMode == GameMode.Chaos ? 5 : 3;
+	const board = useSharedValue(newEmptyBoard(boardLength));
 	const draggingPiece = useSharedValue<number | null>(null);
-	const possibleBoardDropSpots = useSharedValue<PossibleBoardSpots>(JS_emptyPossibleBoardSpots());
-	const hand = useSharedValue(createRandomHand());
+	const possibleBoardDropSpots = useSharedValue<PossibleBoardSpots>(JS_emptyPossibleBoardSpots(boardLength));
+	const hand = useSharedValue(createRandomHand(handSize));
 	const score = useSharedValue(0);
 	const combo = useSharedValue(0);
 	// How many moves ago was the last broken line?
-	const lastBrokenLine = useSharedValue(3);
+	const lastBrokenLine = useSharedValue(0);
 	
 	const addScoreWithTimeout = (timeout: number, scoreDelta: number) => {
 		setTimeout(() => {
@@ -78,10 +87,6 @@ export const Game = React.memo(() => {
 			const dropIdStr = over.id.toString();
 			const {x: dropX, y: dropY} = decodeDndId(dropIdStr);
 			const piece: PieceData = hand.value[draggingPiece.value!]!;
-			const pieceHeight = piece.matrix.length;
-			const pieceWidth = piece.matrix[0].length;
-			//if (dropX + pieceWidth - 1 > 7 || dropY + pieceHeight - 1 > 7)
-				//return;
 
 			// the block is gonna fit, let's place the block
 			// we'll do the haptics now
@@ -99,10 +104,10 @@ export const Game = React.memo(() => {
 				combo.value += linesBroken;
 				
 				// line break score with combo
-				runOnJS(addScoreWithTimeout)(200, linesBroken * BOARD_LENGTH * combo.value * pieceBlockCount);
+				runOnJS(addScoreWithTimeout)(200, linesBroken * boardLength * (combo.value / 2) * pieceBlockCount);
 			} else {
 				lastBrokenLine.value++;
-				if (lastBrokenLine.value >= 3) {
+				if (lastBrokenLine.value >= handSize) {
 					combo.value = 0;
 				}
 			}
@@ -112,14 +117,14 @@ export const Game = React.memo(() => {
 
 			// is hand empty?
 			let empty = true
-			for (let i = 0; i < 3; i++) {
+			for (let i = 0; i < handSize; i++) {
 				if (newHand[i] != null) {
 					empty = false;
 					break;
 				}
 			}
 			if (empty) {
-				hand.value = createRandomHandWorklet();
+				hand.value = createRandomHandWorklet(handSize);
 			} else {
 				hand.value = newHand;
 			}
@@ -128,7 +133,7 @@ export const Game = React.memo(() => {
 			board.value = clearHoverBlocks([...board.value]);
 		}
 		draggingPiece.value = null;
-		possibleBoardDropSpots.value = emptyPossibleBoardSpots();
+		possibleBoardDropSpots.value = emptyPossibleBoardSpots(boardLength);
 	};
 
 	const handleBegin: DndProviderProps["onBegin"] = (event, meta) => {
@@ -142,8 +147,8 @@ export const Game = React.memo(() => {
 
 	const handleFinalize: DndProviderProps["onFinalize"] = ({ state }) => {
 		"worklet";
-		if (state !== State.FAILED) {
-			
+		if (state !== State.END) {
+			draggingPiece.value = null;
 		}
 	};
 
@@ -161,10 +166,6 @@ export const Game = React.memo(() => {
 		const dropIdStr = droppableActiveId.toString();
 		const {x: dropX, y: dropY} = decodeDndId(dropIdStr);
 		const piece: PieceData = hand.value[draggingPiece.value!]!;
-		const pieceHeight = piece.matrix.length;
-		const pieceWidth = piece.matrix[0].length;
-		//if (dropX + pieceWidth - 1 > 7 || dropY + pieceHeight - 1 > 7)
-		//	return;
 
 		const newBoard = clearHoverBlocks([...board.value]);
 		updateHoveredBreaks(newBoard, piece, dropX, dropY);
@@ -173,28 +174,30 @@ export const Game = React.memo(() => {
 	}
 	
 	return (        
-		<View style={styles.root}>
-			<SafeAreaView style={styles.root}>
-				<GestureHandlerRootView style={styles.root}>
+		<SafeAreaView style={styles.root}>
+			<GestureHandlerRootView style={styles.root}>
+				<View style={styles.root}>
 					<DndProvider shouldDropWorklet={pieceOverlapsRectangle} springConfig={SPRING_CONFIG_MISSED_DRAG} onBegin={handleBegin} onFinalize={handleFinalize} onDragEnd={handleDragEnd} onUpdate={handleUpdate}>
-						<GameHud score={score} combo={combo} lastBrokenLine={lastBrokenLine}></GameHud>
-						<BlockGrid board={board} possibleBoardDropSpots={possibleBoardDropSpots}></BlockGrid>
+						<StickyGameHud></StickyGameHud>
+						<StatsGameHud score={score} combo={combo} lastBrokenLine={lastBrokenLine} hand={hand}></StatsGameHud>
+						<BlockGrid board={board} possibleBoardDropSpots={possibleBoardDropSpots} hand={hand} draggingPiece={draggingPiece}></BlockGrid>
 						<HandPieces hand={hand}></HandPieces>
 					</DndProvider>
-				</GestureHandlerRootView>
-			</SafeAreaView>
-		</View>
+				</View>
+			</GestureHandlerRootView>
+		</SafeAreaView>
 	);
 })
 
 const styles = StyleSheet.create({
 	root: {
+		width: '100%',
 		flex: 1,
 		justifyContent: 'center',
 		alignItems: 'center',
-		backgroundColor: '#130617',
 		padding: 0,
-		overflow: 'hidden'
+		overflow: 'hidden',
+		backgroundColor: 'black' 
 	}
 })
 

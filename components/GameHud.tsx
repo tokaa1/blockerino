@@ -1,28 +1,37 @@
-import { BOARD_LENGTH, GRID_BLOCK_SIZE } from "@/constants/Board"
+import { GRID_BLOCK_SIZE } from "@/constants/Board"
 import { useRef, useState } from "react"
-import { StyleSheet, Text, View } from "react-native"
-import Animated, { SharedValue, runOnJS, useAnimatedReaction, useAnimatedStyle, useDerivedValue, withTiming } from "react-native-reanimated"
+import { Easing, StyleSheet, Text, View } from "react-native"
+import Animated, { SharedValue, runOnJS, useAnimatedReaction, useAnimatedStyle, useDerivedValue, useSharedValue, withSpring, withTiming } from "react-native-reanimated"
 import AnimatedNumbers from 'react-native-animated-numbers';
+import { Hand } from "@/constants/Hand";
 
 interface GameHudProps {
 	score: SharedValue<number>,
 	combo: SharedValue<number>,
-	lastBrokenLine: SharedValue<number>
+	lastBrokenLine: SharedValue<number>,
+	hand: SharedValue<Hand>
 }
 
-export default function GameHud({ score, combo, lastBrokenLine }: GameHudProps) {
-	const [scoreState, setScoreState] = useState(0);
+export function StatsGameHud({ score, combo, lastBrokenLine, hand}: GameHudProps) {
+	const [scoreText, setScoreText] = useState("0");
+	const scoreAnimValue = useSharedValue(0); // stores the score, used to interpolate the number for animation
 
 	useAnimatedReaction(() => {
 		return score.value;
-	}, (currentValue, previousValue) => {
-		runOnJS(setScoreState)(currentValue);
+	}, (current, prev) => {
+		scoreAnimValue.value = withTiming(current, { duration: 200 });
+	})
+	
+	useAnimatedReaction(() => {
+		return scoreAnimValue.value
+	}, (current, prev) => {
+		runOnJS(setScoreText)(String(Math.floor(current)));
 	})
 
-	return (
+	return <>
 		<View style={styles.hudContainer}>
 			<View style={styles.scoreContainer}>
-				<AnimatedNumbers includeComma={false} animateToNumber={scoreState} animationDuration={700} fontStyle={{
+				<Text style={{
 					color: 'white',
 					fontFamily: 'Silkscreen',
 					fontSize: 50,
@@ -30,22 +39,32 @@ export default function GameHud({ score, combo, lastBrokenLine }: GameHudProps) 
 					textShadowColor: 'rgb(0, 0, 0)',
 					textShadowOffset: { width: 3, height: 3 },
 					textShadowRadius: 10
-				}} />
+				}}>{scoreText}</Text>
 			</View>
-			<ComboBar lastBrokenLine={lastBrokenLine}></ComboBar>
+			<ComboBar lastBrokenLine={lastBrokenLine} handSize={hand.value.length}></ComboBar>
 		</View>
-	)
+	</>
 }
 
 interface ComboBarProps {
-	lastBrokenLine: SharedValue<number>
+	lastBrokenLine: SharedValue<number>,
+	handSize: number
 };
 
-function ComboBar({ lastBrokenLine }: ComboBarProps) {
+function ComboBar({ lastBrokenLine, handSize }: ComboBarProps) {
+	const width = useSharedValue(100);
+	
+	useAnimatedReaction(() => {
+		return lastBrokenLine.value
+	}, (current, previous) => {
+		width.value = withSpring((1 - lastBrokenLine.value / handSize) * 100, {
+			duration: 800
+		})
+	})
+	
 	const animatedStyle = useAnimatedStyle(() => {
-		console.log(lastBrokenLine.value);
 		return {
-			width: `${(1 - (lastBrokenLine.value / 3)) * 100}%`,
+			width: `${width.value}%`
 		};
 	});
 
@@ -56,12 +75,29 @@ function ComboBar({ lastBrokenLine }: ComboBarProps) {
 	);
 };
 
+export function StickyGameHud() {
+	return <View style={styles.stickyHud}>
+		<Text style={styles.highScoreLabel}>{"👑0"}</Text>
+	</View>
+}
+
 const styles = StyleSheet.create({
+	stickyHud: {
+		position: 'absolute',
+		top: -6,
+		left: -5
+	},
+	highScoreLabel: {
+		color: 'rgb(240, 175, 12)',
+		fontFamily: 'Silkscreen',
+		fontSize: 35,
+		fontWeight: '100'
+	},
 	hudContainer: {
-		width: GRID_BLOCK_SIZE * BOARD_LENGTH + 8,
+		width: '100%',//GRID_BLOCK_SIZE * BOARD_LENGTH + 8,
 		height: 120,
 		justifyContent: 'center',
-		alignItems: 'center'
+		alignItems: 'center',
 	},
 	scoreContainer: {
 		width: '100%',

@@ -26,17 +26,21 @@ import Animated, {
 	ReanimatedLogLevel,
 	configureReanimatedLogger,
 	runOnJS,
+	useDerivedValue,
 } from "react-native-reanimated";
 import { createFilledBlockStyle, getRandomPiece } from "@/constants/Piece";
-import Game, { GameMode } from "@/components/Game";
+import Game, { GameMode } from "@/components/game/Game";
 import { useAudioPlayer } from 'expo-audio';
+import React from "react";
+import OptionsMenu from "@/components/options/OptionsMenu";
+import MainMenu from "@/components/menu/MainMenu";
+import { atom, useAtom } from "jotai";
+import { AppState, useAppState } from "@/hooks/useAppState";
 
 configureReanimatedLogger({
 	level: ReanimatedLogLevel.warn,
 	strict: false,
 });
-
-const colors = ["#FF3333", "#FF00FF", "#00FF00", "#00FF00"];
 
 export default function App() {
 	const [loaded] = useFonts({
@@ -46,155 +50,31 @@ export default function App() {
 		SilkscreenBold: require("../assets/fonts/Silkscreen-Bold.ttf"),
 	});
 
-	const [playing, setPlaying] = useState<GameMode | null>(null);
+	const [ appState, setAppState ] = useAppState();
 
 	if (!loaded) return null;
-
-	if (playing != null) {
-		return <Game gameMode={playing}></Game>;
-	}
-
+	
 	return (
 		<Animated.View entering={FadeIn} exiting={FadeOut} style={styles.container}>
 			{[...Array(25)].map((_, i) => (
 				<PieceParticle key={`particle${i}`} />
 			))}
 
-			<Animated.Text entering={BounceInUp.duration(800)} style={[styles.logo]}>
-				blockerino
-			</Animated.Text>
+			{ Object.values(GameMode).includes(appState as any) && <Game gameMode={appState as GameMode}></Game>}
 
-			<MainButton
-				onClick={() => {
-					setPlaying(GameMode.Classic);
-				}}
-				backgroundColor={colors[0]}
-				title={"Classic ∞"}
-				flavorText={"classical line breaking"}
-				idleBounce={true}
-			/>
-			<MainButton
-				onClick={() => {
-					setPlaying(GameMode.Chaos);
-				}}
-				backgroundColor={"#000000"}
-				title={"Chaos !?"}
-				flavorText={"10x10, 5 piece hand!?"}
-				style={{ borderWidth: 2, borderColor: "rgb(50, 50, 50)" }}
-				textStyle={{ color: "white" }}
-				idleBounceRotate={true}
-			/>
-			<MainButton backgroundColor={colors[1]} title={"High Scores"} />
-			<MainButton backgroundColor={colors[2]} title={"Options"} />
+			{ appState == AppState.OPTIONS &&
+				<OptionsMenu></OptionsMenu>
+			}
 
-			<Animated.Text entering={FadeIn} style={styles.footer}>
-				beta version
-			</Animated.Text>
+			{ appState == AppState.MENU && 
+				<MainMenu></MainMenu>
+			}
+		
 		</Animated.View>
 	);
 }
 
-function MainButton({
-	style,
-	textStyle,
-	backgroundColor,
-	title,
-	flavorText,
-	idleBounce,
-	idleBounceRotate,
-	onClick,
-}: {
-	style?: any;
-	textStyle?: any;
-	backgroundColor: string;
-	title: string;
-	flavorText?: string;
-	idleBounce?: boolean;
-	idleBounceRotate?: boolean;
-	onClick?: () => void;
-}) {
-	const scale = useSharedValue(1);
-	const translateY = useSharedValue(0);
-	const rotationDeg = useSharedValue(0);
-
-	const animatedStyle = useAnimatedStyle(() => {
-		return {
-			transform: [
-				{ translateY: translateY.value },
-				{ rotate: `${rotationDeg.value}deg` },
-				{ scale: scale.value }
-			],
-		};
-	});
-
-	useEffect(() => {
-		const idleBounceTotalTime = 3700;
-		if (idleBounce) {
-			translateY.value = withRepeat(
-				withSequence(
-					withDelay(2500, withTiming(-30, { duration: 200 })),
-					withTiming(0, { duration: 1000, easing: Easing.bounce }),
-				),
-				1000,
-			);
-		} else if (idleBounceRotate) {
-			const amplitude = 10;
-			const steps = 5;
-			const stepDuration = 160;
-			const anims = [];
-			for (let i = 0; i < steps; i++) {
-				let deg;
-				if (i == steps - 1) {
-					deg = 0;
-				} else {
-					deg = i % 2 == 0 ? -amplitude : amplitude;
-				}
-				anims.push(
-					withTiming(deg, { duration: stepDuration, easing: Easing.cubic }),
-				);
-			}
-
-			rotationDeg.value = withRepeat(
-				withDelay(
-					idleBounceTotalTime - stepDuration * steps,
-					withSequence(...anims),
-				),
-				1000,
-			);
-		}
-	}, []);
-
-	const onPress = () => {
-		scale.value = withSequence(withTiming(1.25, { duration: 200 }), withTiming(1, { duration: 200 }));
-		if (onClick)
-			onClick();
-	}
-	
-	return (
-		<Pressable style={styles.buttonPressable} onPress={onPress}>
-			<Animated.View
-				key={title}
-				style={[
-					styles.button,
-					{ backgroundColor },
-					animatedStyle,
-					style ? style : {},
-				]}
-			>
-				<Text style={[styles.buttonText, textStyle ? textStyle : {}]}>
-					{title}
-				</Text>
-				{flavorText && (
-					<Text style={[styles.buttonFlavorText, textStyle ? textStyle : {}]}>
-						{flavorText}
-					</Text>
-				)}
-			</Animated.View>
-		</Pressable>
-	);
-}
-
-function PieceParticle() {
+const PieceParticle = React.memo(() => {
 	const [{width, height}, setWindowDimensions] = useState(Dimensions.get('window'));
 	useEffect(() => {
 		const handleResize = () => {
@@ -296,7 +176,7 @@ function PieceParticle() {
 			{pieceBlocks}
 		</Animated.View>
 	);
-}
+});
 
 const styles = StyleSheet.create({
 	container: {
@@ -304,47 +184,5 @@ const styles = StyleSheet.create({
 		backgroundColor: "black",
 		alignItems: "center",
 		justifyContent: "center",
-	},
-	logo: {
-		fontFamily: "Silkscreen",
-		fontSize: 40,
-		color: "#FFF",
-		marginBottom: 50,
-		textAlign: "center",
-	},
-	button: {
-		width: "100%",
-		height: 60,
-		justifyContent: "center",
-		alignItems: "center",
-		marginBottom: 20,
-		borderRadius: 10,
-		maxWidth: 420,
-	},
-	buttonPressable: {
-		width: "80%",
-		height: 60,
-		justifyContent: "center",
-		alignItems: "center",
-		marginBottom: 20,
-		borderRadius: 10,
-		maxWidth: 420,
-	},
-	buttonText: {
-		fontFamily: "Silkscreen",
-		fontSize: 24,
-		color: "black",
-	},
-	buttonFlavorText: {
-		fontFamily: "Silkscreen",
-		fontSize: 14,
-		color: "rgb(30, 30, 30)",
-	},
-	footer: {
-		fontFamily: "Silkscreen",
-		fontSize: 16,
-		color: "#555",
-		position: "absolute",
-		bottom: 20,
-	},
+	}
 });

@@ -8,10 +8,10 @@ import * as Haptics from 'expo-haptics';
 import { useFonts } from 'expo-font';
 import { Color, colorToHex } from '@/constants/Color';
 import { Board, BoardBlockType, DRAG_JUMP_LENGTH, GRID_BLOCK_SIZE, HAND_BLOCK_SIZE, HITBOX_SIZE, JS_emptyPossibleBoardSpots, PossibleBoardSpots, XYPoint, breakLines, clearHoverBlocks, createPossibleBoardSpots, emptyPossibleBoardSpots, newEmptyBoard, placePieceOntoBoard, updateHoveredBreaks } from '@/constants/Board';
-import { StatsGameHud, StickyGameHud } from '@/components/GameHud';
-import BlockGrid from '@/components/BlockGrid';
+import { StatsGameHud, StickyGameHud } from '@/components/game/GameHud';
+import BlockGrid from '@/components/game/BlockGrid';
 import { createRandomHand, createRandomHandWorklet } from '@/constants/Hand';
-import HandPieces from '@/components/HandPieces';
+import HandPieces from '@/components/game/HandPieces';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAudioPlayer } from 'expo-audio';
 
@@ -55,8 +55,8 @@ function runPiecePlacedHaptic() {
 }
 
 export enum GameMode {
-	Classic,
-	Chaos
+	Classic = 'classic',
+	Chaos = 'chaos'
 }
 
 export const Game = (({gameMode}: {gameMode: GameMode}) => {
@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		padding: 0,
 		overflow: 'hidden',
-		backgroundColor: 'black' 
+		backgroundColor: 'rgba(0, 0, 0, 0.4)' 
 	}
 })
 

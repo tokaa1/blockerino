@@ -1,12 +1,8 @@
 import { useEffect, useState } from "react";
 import {
 	View,
-	Text,
-	TouchableOpacity,
 	StyleSheet,
 	Dimensions,
-	Touchable,
-	Pressable,
 } from "react-native";
 import { useFonts } from "expo-font";
 import Animated, {
@@ -16,26 +12,17 @@ import Animated, {
 	withRepeat,
 	withSequence,
 	withDelay,
-	withSpring,
-	Easing,
 	FadeIn,
 	FadeOut,
-	SlideInDown,
-	BounceInDown,
-	BounceInUp,
 	ReanimatedLogLevel,
 	configureReanimatedLogger,
-	runOnJS,
-	useDerivedValue,
 } from "react-native-reanimated";
 import { createFilledBlockStyle, getRandomPiece } from "@/constants/Piece";
-import Game, { GameMode } from "@/components/game/Game";
-import { useAudioPlayer } from 'expo-audio';
+import Game from "@/components/game/Game";
 import React from "react";
 import OptionsMenu from "@/components/options/OptionsMenu";
 import MainMenu from "@/components/menu/MainMenu";
-import { atom, useAtom } from "jotai";
-import { AppState, useAppState } from "@/hooks/useAppState";
+import { MenuStateType, useAppState } from "@/hooks/useAppState";
 
 configureReanimatedLogger({
 	level: ReanimatedLogLevel.warn,
@@ -50,9 +37,11 @@ export default function App() {
 		SilkscreenBold: require("../assets/fonts/Silkscreen-Bold.ttf"),
 	});
 
-	const [ appState, setAppState ] = useAppState();
+	const [ appState ] = useAppState();
 
 	if (!loaded) return null;
+
+	const gameMode = appState.containsGameMode();
 	
 	return (
 		<Animated.View entering={FadeIn} exiting={FadeOut} style={styles.container}>
@@ -60,13 +49,13 @@ export default function App() {
 				<PieceParticle key={`particle${i}`} />
 			))}
 
-			{ Object.values(GameMode).includes(appState as any) && <Game gameMode={appState as GameMode}></Game>}
+			{ gameMode && <Game gameMode={gameMode}></Game>}
 
-			{ appState == AppState.OPTIONS &&
+			{ appState.containsState(MenuStateType.OPTIONS) &&
 				<OptionsMenu></OptionsMenu>
 			}
 
-			{ appState == AppState.MENU && 
+			{ (appState.containsState(MenuStateType.MENU) && !gameMode) && 
 				<MainMenu></MainMenu>
 			}
 		

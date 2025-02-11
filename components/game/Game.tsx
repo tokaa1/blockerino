@@ -1,19 +1,15 @@
-import { PieceData, createFilledBlockStyle, getBlockCount, getRandomPiece, getRandomPieceWorklet } from '@/constants/Piece';
-import { DndProvider, DndProviderProps, Draggable, Droppable, Rectangle, SharedPoint, useDraggable, useDroppable } from '@mgcrea/react-native-dnd';
-import React, { useRef, useEffect, DependencyList } from 'react';
-import { LayoutChangeEvent, Platform, SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import { PieceData, getBlockCount } from '@/constants/Piece';
+import { DndProvider, DndProviderProps, Rectangle } from '@mgcrea/react-native-dnd';
+import React, { DependencyList } from 'react';
+import { Platform, SafeAreaView, StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView, State } from 'react-native-gesture-handler';
-import Animated, { ReduceMotion, SharedValue, dispatchCommand, runOnJS, runOnUI, useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
+import { ReduceMotion, runOnJS, useSharedValue } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
-import { useFonts } from 'expo-font';
-import { Color, colorToHex } from '@/constants/Color';
-import { Board, BoardBlockType, DRAG_JUMP_LENGTH, GRID_BLOCK_SIZE, HAND_BLOCK_SIZE, HITBOX_SIZE, JS_emptyPossibleBoardSpots, PossibleBoardSpots, XYPoint, breakLines, clearHoverBlocks, createPossibleBoardSpots, emptyPossibleBoardSpots, newEmptyBoard, placePieceOntoBoard, updateHoveredBreaks } from '@/constants/Board';
+import { BoardBlockType, GRID_BLOCK_SIZE, JS_emptyPossibleBoardSpots, PossibleBoardSpots, XYPoint, breakLines, clearHoverBlocks, createPossibleBoardSpots, emptyPossibleBoardSpots, newEmptyBoard, placePieceOntoBoard, updateHoveredBreaks } from '@/constants/Board';
 import { StatsGameHud, StickyGameHud } from '@/components/game/GameHud';
 import BlockGrid from '@/components/game/BlockGrid';
 import { createRandomHand, createRandomHandWorklet } from '@/constants/Hand';
 import HandPieces from '@/components/game/HandPieces';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useAudioPlayer } from 'expo-audio';
 
 // layout = active/dragging
 const pieceOverlapsRectangle = (layout: Rectangle, other: Rectangle) => {
@@ -54,14 +50,14 @@ function runPiecePlacedHaptic() {
 	runOnJS(impactAsyncHelper)(Haptics.ImpactFeedbackStyle.Light);
 }
 
-export enum GameMode {
+export enum GameModeType {
 	Classic = 'classic',
 	Chaos = 'chaos'
 }
 
-export const Game = (({gameMode}: {gameMode: GameMode}) => {
-	const boardLength = gameMode == GameMode.Chaos ? 10 : 8;
-	const handSize = gameMode == GameMode.Chaos ? 5 : 3;
+export const Game = (({gameMode}: {gameMode: GameModeType}) => {
+	const boardLength = gameMode == GameModeType.Chaos ? 10 : 8;
+	const handSize = gameMode == GameModeType.Chaos ? 5 : 3;
 	const board = useSharedValue(newEmptyBoard(boardLength));
 	const draggingPiece = useSharedValue<number | null>(null);
 	const possibleBoardDropSpots = useSharedValue<PossibleBoardSpots>(JS_emptyPossibleBoardSpots(boardLength));

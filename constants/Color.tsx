@@ -1,3 +1,11 @@
+export const cssColors = {
+    brightNiceRed: "#FF3333",
+    pink: "#FF00FF",
+    green: "#00FF00",
+    pitchBlack: "#000000",
+    spaceGray: "rgb(90, 90, 90)"
+}
+
 export interface Color {
     r: number,
     g: number,

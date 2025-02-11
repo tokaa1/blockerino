@@ -2,13 +2,12 @@ import { useAtom, useSetAtom } from "jotai";
 import { useEffect } from "react";
 import { Pressable, StyleSheet, Text } from "react-native";
 import Animated, { BounceInUp, Easing, FadeIn, useAnimatedStyle, useDerivedValue, useSharedValue, withDelay, withRepeat, withSequence, withSpring, withTiming } from "react-native-reanimated";
-import { GameMode } from "../game/Game";
-import { AppState, useSetAppState } from "@/hooks/useAppState";
-
-const colors = ["#FF3333", "#FF00FF", "#00FF00", "#00FF00"];
+import { GameModeType } from "../game/Game";
+import { MenuStateType, useSetAppState } from "@/hooks/useAppState";
+import { cssColors } from "@/constants/Color";
 
 export default function MainMenu() {
-	const setAppState = useSetAppState();
+	const [ _, appendAppState ] = useSetAppState();
 	
 	return <>
 		<Animated.Text entering={BounceInUp.duration(800)} style={[styles.logo]}>
@@ -17,18 +16,18 @@ export default function MainMenu() {
 
 		<MainButton
 			onClick={() => {
-				setAppState(GameMode.Classic);
+				appendAppState(GameModeType.Classic);
 			}}
-			backgroundColor={colors[0]}
+			backgroundColor={cssColors.brightNiceRed}
 			title={"Classic ∞"}
 			flavorText={"classical line breaking"}
 			idleBounce={true}
 		/>
 		<MainButton
 			onClick={() => {
-				setAppState(GameMode.Chaos);
+				appendAppState(GameModeType.Chaos);
 			}}
-			backgroundColor={"#000000"}
+			backgroundColor={cssColors.pitchBlack}
 			title={"Chaos !?"}
 			flavorText={"10x10, 5 piece hand!?"}
 			style={{ borderWidth: 2, borderColor: "rgb(50, 50, 50)" }}
@@ -36,11 +35,11 @@ export default function MainMenu() {
 			idleBounceRotate={true}
 		/>
 		<MainButton onClick = {() => {
-			setAppState(AppState.HIGH_SCORES)
-		}} backgroundColor={colors[1]} title={"High Scores"} />
+			appendAppState(MenuStateType.HIGH_SCORES)
+		}} backgroundColor={cssColors.pink} title={"High Scores"} />
 		<MainButton onClick = {() => {
-			setAppState(AppState.OPTIONS)
-		}} backgroundColor={colors[2]} title={"Options"} />
+			appendAppState(MenuStateType.OPTIONS)
+		}} backgroundColor={cssColors.green} title={"Options"} />
 
 		<Animated.Text entering={FadeIn} style={styles.footer}>
 			beta version

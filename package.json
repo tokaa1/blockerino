@@ -22,10 +22,13 @@
     "@types/react-test-renderer": "^19.0.0",
     "babel-plugin-react-compiler": "^19.0.0-beta-e552027-20250112",
     "expo": "~52.0.31",
+    "expo-audio": "~0.3.4",
+    "expo-av": "~15.0.2",
     "expo-blur": "~14.0.2",
     "expo-constants": "~17.0.4",
     "expo-font": "~13.0.3",
     "expo-haptics": "~14.0.1",
+    "expo-linear-gradient": "~14.0.2",
     "expo-linking": "~7.0.4",
     "expo-router": "~4.0.17",
     "expo-splash-screen": "~0.29.21",
@@ -45,10 +48,7 @@
     "react-native-screens": "~4.4.0",
     "react-native-svg": "15.8.0",
     "react-native-web": "~0.19.13",
-    "react-native-webview": "^13.12.5",
-    "expo-linear-gradient": "~14.0.2",
-    "expo-av": "~15.0.2",
-    "expo-audio": "~0.3.4"
+    "react-native-webview": "^13.12.5"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

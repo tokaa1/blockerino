@@ -197,14 +197,14 @@ export const piecesData: PieceDataSaved[] = [
 			[1],
 			[1],
 		],
-		distributionPoints: 10,
+		distributionPoints: 4,
 	},
 	// 1x3
 	{
 		matrix: [
 			[1, 1, 1],
 		],
-		distributionPoints: 10,
+		distributionPoints: 4,
 	},
 	// 2x1
 	{
@@ -212,14 +212,14 @@ export const piecesData: PieceDataSaved[] = [
 			[1],
 			[1],
 		],
-		distributionPoints: 15,
+		distributionPoints: 2,
 	},
 	// 1x2
 	{
 		matrix: [
 			[1, 1],
 		],
-		distributionPoints: 15,
+		distributionPoints: 2,
 	},
 ];
 

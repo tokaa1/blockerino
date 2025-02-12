@@ -1,16 +1,17 @@
 import { cssColors } from "@/constants/Color";
 import { MenuStateType, useAppState, useAppStateValue } from "@/hooks/useAppState";
 import { Pressable, StyleSheet, Switch, Text, View } from "react-native";
+import SimplePopupView from "../SimplePopupView";
 
 export default function OptionsMenu() {
 	const [ appState, setAppState, _appendAppState, popAppState ] = useAppState();
 
-	return <View style={styles.optionsView}>
+	return <SimplePopupView>
 		<StylizedButton onClick={popAppState} text="Back" backgroundColor={cssColors.spaceGray}></StylizedButton>
 		{ appState.containsGameMode() && 
 			<StylizedButton onClick={() => { setAppState(MenuStateType.MENU) }} text="Quit Run" backgroundColor={cssColors.brightNiceRed}></StylizedButton>
 		}
-	</View>
+	</SimplePopupView>
 }
 
 function StylizedButton({text, onClick, backgroundColor, centered}: {text: string, onClick?: () => void, backgroundColor: string, centered?: boolean}) {
@@ -45,18 +46,6 @@ const styles = StyleSheet.create({
 		fontSize: 18,
 		color: 'white',
 		fontFamily: 'Silkscreen'
-	},
-	optionsView: {
-		width: '81%',
-		height: '70%',
-		backgroundColor: 'rgba(5, 5, 5, 0.95)',
-		borderRadius: 20,
-		borderColor: 'rgb(90, 90, 90)',
-		borderWidth: 2,
-		justifyContent: 'center',
-		alignItems: 'center',
-		position: 'absolute',
-		zIndex: 100
 	},
 	settingLabelContainer: {
 		width: '80%',

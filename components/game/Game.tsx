@@ -10,6 +10,7 @@ import { StatsGameHud, StickyGameHud } from '@/components/game/GameHud';
 import BlockGrid from '@/components/game/BlockGrid';
 import { createRandomHand, createRandomHandWorklet } from '@/constants/Hand';
 import HandPieces from '@/components/game/HandPieces';
+import { GameModeType } from '@/hooks/useAppState';
 
 // layout = active/dragging
 const pieceOverlapsRectangle = (layout: Rectangle, other: Rectangle) => {
@@ -48,11 +49,6 @@ function impactAsyncHelper(style: Haptics.ImpactFeedbackStyle) {
 function runPiecePlacedHaptic() {
 	"worklet";
 	runOnJS(impactAsyncHelper)(Haptics.ImpactFeedbackStyle.Light);
-}
-
-export enum GameModeType {
-	Classic = 'classic',
-	Chaos = 'chaos'
 }
 
 export const Game = (({gameMode}: {gameMode: GameModeType}) => {

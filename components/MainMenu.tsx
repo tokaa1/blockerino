@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, Text } from "react-native";
 import Animated, { BounceInUp, Easing, FadeIn, useAnimatedStyle, useDerivedValue, useSharedValue, withDelay, withRepeat, withSequence, withSpring, withTiming } from "react-native-reanimated";
 import { MenuStateType, useSetAppState } from "@/hooks/useAppState";
 import { cssColors } from "@/constants/Color";
-import { GameModeType } from "./game/Game";
+import { GameModeType } from '@/hooks/useAppState';
 
 export default function MainMenu() {
 	const [ _, appendAppState ] = useSetAppState();

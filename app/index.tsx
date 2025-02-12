@@ -18,7 +18,8 @@ import Animated, {
 	configureReanimatedLogger,
 } from "react-native-reanimated";
 import { createFilledBlockStyle, getRandomPiece } from "@/constants/Piece";
-import Game, { GameModeType } from "@/components/game/Game";
+import Game from "@/components/game/Game";
+import { GameModeType } from '@/hooks/useAppState';
 import React from "react";
 import OptionsMenu from "@/components/OptionsMenu";
 import { MenuStateType, useAppState } from "@/hooks/useAppState";

@@ -1,10 +1,14 @@
-import { GameModeType } from "@/components/game/Game";
 import { SetStateAction, atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 
 export enum MenuStateType {
 	MENU = 'menu',
 	OPTIONS = 'options', 
 	HIGH_SCORES = 'highscores'
+}
+
+export enum GameModeType {
+	Classic = 'classic',
+	Chaos = 'chaos'
 }
 
 type AppStateType = GameModeType | MenuStateType;

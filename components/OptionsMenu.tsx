@@ -2,6 +2,7 @@ import { cssColors } from "@/constants/Color";
 import { MenuStateType, useAppState, useAppStateValue } from "@/hooks/useAppState";
 import { Pressable, StyleSheet, Switch, Text, View } from "react-native";
 import SimplePopupView from "./SimplePopupView";
+import StylizedButton from "./StylizedButton";
 
 export default function OptionsMenu() {
 	const [ appState, setAppState, _appendAppState, popAppState ] = useAppState();
@@ -12,15 +13,6 @@ export default function OptionsMenu() {
 			<StylizedButton onClick={() => { setAppState(MenuStateType.MENU) }} text="Quit Run" backgroundColor={cssColors.brightNiceRed}></StylizedButton>
 		}
 	</SimplePopupView>
-}
-
-function StylizedButton({text, onClick, backgroundColor, centered}: {text: string, onClick?: () => void, backgroundColor: string, centered?: boolean}) {
-	if (centered == undefined) {
-		centered = true;
-	}
-	return <Pressable onPress={onClick} style={[styles.stylizedButton, {backgroundColor, alignSelf: centered ? 'center' : 'flex-start'}]}>
-		<Text style={styles.stylizedButtonText}>{text}</Text>
-	</Pressable>
 }
 
 function SettingLabel({title, description, children}: {title: string, description?: string, children?: any}) {
@@ -34,19 +26,6 @@ function SettingLabel({title, description, children}: {title: string, descriptio
 }
 
 const styles = StyleSheet.create({
-	stylizedButton: {
-		width: 160,
-		height: 30,
-		borderRadius: 6,
-		justifyContent: 'center',
-		alignItems: 'center',
-		margin: 4
-	},
-	stylizedButtonText: {
-		fontSize: 18,
-		color: 'white',
-		fontFamily: 'Silkscreen'
-	},
 	settingLabelContainer: {
 		width: '80%',
 		height: 'auto',

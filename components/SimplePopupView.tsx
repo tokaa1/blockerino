@@ -11,6 +11,8 @@ export default function SimplePopupView({children}: {children: any}) {
 		justifyContent: 'center',
 		alignItems: 'center',
 		position: 'absolute',
-		zIndex: 100
+		zIndex: 100,
+        overflowY: 'scroll',
+        overflowX: 'hidden'
 	}}>{children}</View>
 }

@@ -24,6 +24,7 @@ import React from "react";
 import OptionsMenu from "@/components/OptionsMenu";
 import { MenuStateType, useAppState } from "@/hooks/useAppState";
 import MainMenu from "@/components/MainMenu";
+import HighScores from "@/components/HighScoresMenu";
 
 configureReanimatedLogger({
 	level: ReanimatedLogLevel.warn,
@@ -51,13 +52,10 @@ export default function App() {
 				<PieceParticle key={`particle${i}`} />
 			))}
 
-			{ (appState.containsState(MenuStateType.MENU) && !gameMode) && 
-				<MainMenu></MainMenu>
-			}
-			{ gameMode && <Game gameMode={gameMode}></Game>}
-			{ appState.containsState(MenuStateType.OPTIONS) &&
-				<OptionsMenu></OptionsMenu>
-			}
+			{ (appState.containsState(MenuStateType.MENU) && !gameMode) && <MainMenu></MainMenu> }
+			{ gameMode && <Game gameMode={gameMode}></Game> }
+			{ appState.containsState(MenuStateType.OPTIONS) && <OptionsMenu></OptionsMenu> }
+			{ appState.containsState(MenuStateType.HIGH_SCORES) && <HighScores></HighScores>}
 		</Animated.View>
 	);
 }

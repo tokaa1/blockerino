@@ -89,11 +89,7 @@ function createBlockStyle(
 					: block.hoveredBreakColor;
 			style = {
 				...createFilledBlockStyle(blockColor),
-				shadowColor: colorToHex(blockColor),
-				shadowOffset: { width: 0, height: 0 },
-				shadowOpacity: 1,
-				shadowRadius: 14,
-				opacity: 1,
+				boxShadow: '0px 0px 30px ' + colorToHex(blockColor)
 			};
 		} else {
 			style = createEmptyBlockStyle();

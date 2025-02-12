@@ -34,14 +34,15 @@ function SettingLabel({title, description, children}: {title: string, descriptio
 
 const styles = StyleSheet.create({
 	stylizedButton: {
-		width: 120,
-		height: 24,
+		width: 160,
+		height: 30,
 		borderRadius: 6,
 		justifyContent: 'center',
-		alignItems: 'center'
+		alignItems: 'center',
+		margin: 4
 	},
 	stylizedButtonText: {
-		fontSize: 14,
+		fontSize: 18,
 		color: 'white',
 		fontFamily: 'Silkscreen'
 	},

@@ -1,9 +1,10 @@
 import { GRID_BLOCK_SIZE } from "@/constants/Board"
 import { useRef, useState } from "react"
-import { Easing, StyleSheet, Text, View } from "react-native"
+import { Easing, Pressable, StyleSheet, Text, View } from "react-native"
 import Animated, { SharedValue, runOnJS, useAnimatedReaction, useAnimatedStyle, useDerivedValue, useSharedValue, withSpring, withTiming } from "react-native-reanimated"
 import AnimatedNumbers from 'react-native-animated-numbers';
 import { Hand } from "@/constants/Hand";
+import { MenuStateType, useAppState } from "@/hooks/useAppState";
 
 interface GameHudProps {
 	score: SharedValue<number>,
@@ -76,22 +77,48 @@ function ComboBar({ lastBrokenLine, handSize }: ComboBarProps) {
 };
 
 export function StickyGameHud() {
-	return <View style={styles.stickyHud}>
+	return <>
 		<Text style={styles.highScoreLabel}>{"👑0"}</Text>
-	</View>
+		<SettingsButton></SettingsButton>
+	</>
+}
+
+function SettingsButton() {
+	const [_appState, _setAppState, appendAppState ] = useAppState();
+
+	return <Pressable onPress={() => {appendAppState(MenuStateType.OPTIONS)}} style={styles.settingsButton}>
+		<Text style={styles.settingsEmoji}>
+			{"⚙️"}
+		</Text>
+	</Pressable>
 }
 
 const styles = StyleSheet.create({
-	stickyHud: {
+	settingsButton: {
+		width: 50,
+		height: 50,
+		borderRadius: 18,
+		backgroundColor: 'rgba(20, 20, 20, 0.8)',
+		justifyContent: 'center',
+		alignItems: 'center',
 		position: 'absolute',
-		top: -6,
-		left: -5
+		alignSelf: 'flex-end',
+		zIndex: 1000,
+		top: 50,
+		right: 50
+	},
+	settingsEmoji: {
+		color: 'white',
+		fontSize: 30
 	},
 	highScoreLabel: {
 		color: 'rgb(240, 175, 12)',
 		fontFamily: 'Silkscreen',
 		fontSize: 35,
-		fontWeight: '100'
+		fontWeight: '100',
+		position: 'absolute',
+		top: 50,
+		left: 50
 	},
 	hudContainer: {
 		width: '100%',//GRID_BLOCK_SIZE * BOARD_LENGTH + 8,

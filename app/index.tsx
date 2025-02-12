@@ -20,9 +20,9 @@ import Animated, {
 import { createFilledBlockStyle, getRandomPiece } from "@/constants/Piece";
 import Game from "@/components/game/Game";
 import React from "react";
-import OptionsMenu from "@/components/options/OptionsMenu";
-import MainMenu from "@/components/menu/MainMenu";
+import OptionsMenu from "@/components/OptionsMenu";
 import { MenuStateType, useAppState } from "@/hooks/useAppState";
+import MainMenu from "@/components/MainMenu";
 
 configureReanimatedLogger({
 	level: ReanimatedLogLevel.warn,

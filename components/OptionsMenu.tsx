@@ -1,7 +1,7 @@
 import { cssColors } from "@/constants/Color";
 import { MenuStateType, useAppState, useAppStateValue } from "@/hooks/useAppState";
 import { Pressable, StyleSheet, Switch, Text, View } from "react-native";
-import SimplePopupView from "../SimplePopupView";
+import SimplePopupView from "./SimplePopupView";
 
 export default function OptionsMenu() {
 	const [ appState, setAppState, _appendAppState, popAppState ] = useAppState();

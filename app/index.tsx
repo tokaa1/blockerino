@@ -49,16 +49,13 @@ export default function App() {
 				<PieceParticle key={`particle${i}`} />
 			))}
 
-			{ gameMode && <Game gameMode={gameMode}></Game>}
-
-			{ appState.containsState(MenuStateType.OPTIONS) &&
-				<OptionsMenu></OptionsMenu>
-			}
-
 			{ (appState.containsState(MenuStateType.MENU) && !gameMode) && 
 				<MainMenu></MainMenu>
 			}
-		
+			{ gameMode && <Game gameMode={gameMode}></Game>}
+			{ appState.containsState(MenuStateType.OPTIONS) &&
+				<OptionsMenu></OptionsMenu>
+			}
 		</Animated.View>
 	);
 }

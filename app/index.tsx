@@ -18,7 +18,7 @@ import Animated, {
 	configureReanimatedLogger,
 } from "react-native-reanimated";
 import { createFilledBlockStyle, getRandomPiece } from "@/constants/Piece";
-import Game from "@/components/game/Game";
+import Game, { GameModeType } from "@/components/game/Game";
 import React from "react";
 import OptionsMenu from "@/components/OptionsMenu";
 import { MenuStateType, useAppState } from "@/hooks/useAppState";
@@ -41,7 +41,8 @@ export default function App() {
 
 	if (!loaded) return null;
 
-	const gameMode = appState.containsGameMode();
+	const gameModeSearch = appState.containsGameMode();
+	const gameMode = gameModeSearch ? gameModeSearch.current as GameModeType : undefined;
 	
 	return (
 		<Animated.View entering={FadeIn} exiting={FadeOut} style={styles.container}>

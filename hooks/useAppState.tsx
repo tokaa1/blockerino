@@ -8,7 +8,7 @@ export enum MenuStateType {
 }
 
 type AppStateType = GameModeType | MenuStateType;
-type SetAppState = (value: AppStateType) => void;
+type SetAppState = (value: AppStateType | AppState) => void;
 type AppendAppState = (value: AppStateType) => void;
 type PopAppState = () => void;
 
@@ -21,25 +21,25 @@ export class AppState {
 		this.prev = prev;
 	}
 
-	public containsGameMode(): GameModeType | undefined {
+	public containsGameMode(): AppState | undefined {
 		return this.containsStateComparator((type) => {
 			return Object.values(GameModeType).includes(type as any);
-		}) as GameModeType | undefined;
+		}) as AppState | undefined;
 	}
 
-	public containsState(type: AppStateType): AppStateType | undefined {
+	public containsState(type: AppStateType): AppState | undefined {
 		return this.containsStateComparator((val: AppStateType) => { return val == type; })
 	}
 
-	public containsStateComparator(comparator: (type: AppStateType) => boolean): AppStateType | undefined {
+	public containsStateComparator(comparator: (type: AppStateType) => boolean): AppState | undefined {
 		if (comparator(this.current))
-			return this.current;
+			return this;
 		if (!this.prev)
 			return undefined;
 		let s: AppState | undefined = this.prev;
 		while (s) {
 			if (comparator(s.current)) {
-				return s.current;
+				return s;
 			}
 			s = s.prev;
 		}
@@ -50,8 +50,8 @@ export class AppState {
 const appStateAtom = atom<AppState>(new AppState(MenuStateType.MENU));
 
 function createAppStateFunctions(setAppStateAtom: (...args: any) => void): [SetAppState, AppendAppState, PopAppState] {
-	const setAppState = (value: AppStateType) => {
-		setAppStateAtom(() => new AppState(value));
+	const setAppState = (value: AppStateType | AppState) => {
+		setAppStateAtom(typeof value == typeof AppState ? value as AppState : new AppState(value as AppStateType));
 	}
 	const appendAppState = (value: AppStateType) => {
 		setAppStateAtom((current: AppState) => {

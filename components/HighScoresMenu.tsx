@@ -1,7 +1,7 @@
 import { getHighScores, HighScore } from "@/constants/Storage";
 import SimplePopupView from "./SimplePopupView";
 import { useEffect, useState } from "react";
-import { StyleSheet, Text } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import StylizedButton from "./StylizedButton";
 import { cssColors } from "@/constants/Color";
 import { GameModeType, useSetAppState } from "@/hooks/useAppState";
@@ -9,6 +9,7 @@ import { GameModeType, useSetAppState } from "@/hooks/useAppState";
 export default function HighScores() {
     const [ setAppState, appendAppState, popAppState ] = useSetAppState();
     const [ highScores, setHighScores ] = useState<HighScore[]>([]);
+    const [ gameMode, setGameMode ] = useState(GameModeType.Classic);
     
     useEffect(() => {
         getHighScores().then((value) => {
@@ -19,17 +20,29 @@ export default function HighScores() {
     return <SimplePopupView>
         { highScores.length > 0 &&
             <>
+                <Text style={styles.subHeader}>
+                    {"Select a game mode..."}
+                </Text>
+                <View style={{flexDirection: 'row'}}>
+                    <StylizedButton text="Classic" onClick={() => { setGameMode(GameModeType.Classic) }} backgroundColor={cssColors.brightNiceRed}></StylizedButton>
+                    <StylizedButton text="Chaos" onClick={() => { setGameMode(GameModeType.Chaos) }} backgroundColor={cssColors.pitchBlack}></StylizedButton>
+                </View>
                 <Text style={styles.header}>
                     {"All classic high scores (top 10)"}
                 </Text>
                 <Text style={styles.subHeader}>
                     {"Sorted from high to low."}
                 </Text>
+                {
+                    highScores.map((score, idx) => {
+                        if (score.type == gameMode)
+                            return <Score key={idx} score={score}/>
+                        else
+                            return <></>
+                    })
+                }
             </>
         }
-        { highScores.length > 0 && highScores.map((score, idx) => {
-            return <Score key={idx} score={score}/>
-        })}
         { highScores.length == 0 && 
             <>
                 <Text style={styles.noScoresText}>{"You haven't set a score yet? Get playing!"}</Text>

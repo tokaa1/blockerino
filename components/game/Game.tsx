@@ -1,6 +1,6 @@
 import { PieceData, getBlockCount } from '@/constants/Piece';
 import { DndProvider, DndProviderProps, Rectangle } from '@mgcrea/react-native-dnd';
-import React, { DependencyList } from 'react';
+import React, { DependencyList, useEffect, useRef } from 'react';
 import { Platform, SafeAreaView, StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView, State } from 'react-native-gesture-handler';
 import { ReduceMotion, runOnJS, useSharedValue } from 'react-native-reanimated';
@@ -11,6 +11,7 @@ import BlockGrid from '@/components/game/BlockGrid';
 import { createRandomHand, createRandomHandWorklet } from '@/constants/Hand';
 import HandPieces from '@/components/game/HandPieces';
 import { GameModeType } from '@/hooks/useAppState';
+import { createHighScore, HighScoreId, updateHighScore } from '@/constants/Storage';
 
 // layout = active/dragging
 const pieceOverlapsRectangle = (layout: Rectangle, other: Rectangle) => {
@@ -62,12 +63,16 @@ export const Game = (({gameMode}: {gameMode: GameModeType}) => {
 	const combo = useSharedValue(0);
 	// How many moves ago was the last broken line?
 	const lastBrokenLine = useSharedValue(0);
-	
-	const addScoreWithTimeout = (timeout: number, scoreDelta: number) => {
-		setTimeout(() => {
-			score.value += scoreDelta;
-		}, timeout);
-	}
+
+	const scoreStorageId = useSharedValue<HighScoreId | undefined>(undefined);
+
+	useEffect(() => {
+		if (scoreStorageId.value != undefined)
+			return;
+		createHighScore({score: score.value, date: new Date().getTime(), type: gameMode}).then((id) => {
+			scoreStorageId.value = id;
+		});
+	}, [scoreStorageId]);
 
 	const handleDragEnd: DndProviderProps["onDragEnd"] = ({ active, over }) => {
 		"worklet";
@@ -94,15 +99,16 @@ export const Game = (({gameMode}: {gameMode: GameModeType}) => {
 			if (linesBroken > 0) {
 				lastBrokenLine.value = 0;
 				combo.value += linesBroken;
-				
-				// line break score with combo
-				runOnJS(addScoreWithTimeout)(200, linesBroken * boardLength * (combo.value / 2) * pieceBlockCount);
+				// line break score + combo multiplier stuff
+				score.value += linesBroken * boardLength * (combo.value / 2) * pieceBlockCount;
 			} else {
 				lastBrokenLine.value++;
 				if (lastBrokenLine.value >= handSize) {
 					combo.value = 0;
 				}
 			}
+			if (scoreStorageId)
+				runOnJS(updateHighScore)(scoreStorageId.value!, {score: score.value, date: new Date().getTime(), type: gameMode});
 			
 			const newHand = [...hand.value];
 			newHand[draggingPiece.value!] = null;

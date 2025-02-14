@@ -175,7 +175,7 @@ export const Game = (({gameMode}: {gameMode: GameModeType}) => {
 		<SafeAreaView style={styles.root}>
 			<GestureHandlerRootView style={styles.root}>
 				<View style={styles.root}>
-					<StickyGameHud></StickyGameHud>
+					<StickyGameHud gameMode={gameMode} score={score}></StickyGameHud>
 					<DndProvider shouldDropWorklet={pieceOverlapsRectangle} springConfig={SPRING_CONFIG_MISSED_DRAG} onBegin={handleBegin} onFinalize={handleFinalize} onDragEnd={handleDragEnd} onUpdate={handleUpdate}>
 						<StatsGameHud score={score} combo={combo} lastBrokenLine={lastBrokenLine} hand={hand}></StatsGameHud>
 						<BlockGrid board={board} possibleBoardDropSpots={possibleBoardDropSpots} hand={hand} draggingPiece={draggingPiece}></BlockGrid>

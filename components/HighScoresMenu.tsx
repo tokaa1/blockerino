@@ -12,14 +12,10 @@ export default function HighScores() {
     const [ gameMode, setGameMode ] = useState(GameModeType.Classic);
     
     useEffect(() => {
-        getHighScores().then((value) => {
-            value = value.sort((a, b) => -(a.score - b.score));
-            if (value.length > 10) {
-                value = value.slice(0, 10);
-            }
+        getHighScores(gameMode, true, true, 10).then((value) => {
             setHighScores(value);
         });
-    }, [setHighScores])
+    }, [gameMode, setHighScores]);
 
     return <SimplePopupView style={[{justifyContent: 'flex-start'}]}>
         { highScores.length > 0 &&
@@ -39,10 +35,7 @@ export default function HighScores() {
                 </Text>
                 {
                     highScores.map((score, idx) => {
-                        if (score.type == gameMode)
-                            return <Score key={idx} score={score}/>
-                        else
-                            return <></>
+                        return <Score key={idx} score={score}/>
                     })
                 }
             </>

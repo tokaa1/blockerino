@@ -1,23 +1,13 @@
-import { useEffect, useState } from "react";
 import {
-	View,
 	StyleSheet,
-	Dimensions,
 } from "react-native";
 import { useFonts } from "expo-font";
 import Animated, {
-	useSharedValue,
-	useAnimatedStyle,
-	withTiming,
-	withRepeat,
-	withSequence,
-	withDelay,
 	FadeIn,
 	FadeOut,
 	ReanimatedLogLevel,
 	configureReanimatedLogger,
 } from "react-native-reanimated";
-import { createFilledBlockStyle, getRandomPiece } from "@/constants/Piece";
 import Game from "@/components/game/Game";
 import { GameModeType } from '@/hooks/useAppState';
 import React from "react";

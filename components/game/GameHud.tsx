@@ -1,10 +1,11 @@
 import { GRID_BLOCK_SIZE } from "@/constants/Board"
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Easing, Pressable, StyleSheet, Text, View } from "react-native"
 import Animated, { SharedValue, runOnJS, useAnimatedReaction, useAnimatedStyle, useDerivedValue, useSharedValue, withSpring, withTiming } from "react-native-reanimated"
 import AnimatedNumbers from 'react-native-animated-numbers';
 import { Hand } from "@/constants/Hand";
-import { MenuStateType, useAppState } from "@/hooks/useAppState";
+import { GameModeType, MenuStateType, useAppState } from "@/hooks/useAppState";
+import { getHighScores } from "@/constants/Storage";
 
 interface GameHudProps {
 	score: SharedValue<number>,
@@ -76,9 +77,26 @@ function ComboBar({ lastBrokenLine, handSize }: ComboBarProps) {
 	);
 };
 
-export function StickyGameHud() {
+export function StickyGameHud({gameMode, score}: {gameMode: GameModeType, score: SharedValue<number>}) {
+	const [ highestScore, setHighestScore ] = useState(0);
+	const [ scoreState, setScoreState ] = useState(score.value);
+
+	useEffect(() => {
+		getHighScores(gameMode, true, true).then((highScores) => {
+			if (highScores.length == 0)
+				return;
+			setHighestScore(highScores[0].score);
+		});
+	}, [setHighestScore]);
+	
+	useAnimatedReaction(() => {
+		return score.value;
+	}, (cur, prev) => {
+		runOnJS(setScoreState)(score.value);
+	});
+
 	return <>
-		<Text style={styles.highScoreLabel}>{"👑0"}</Text>
+		<Text style={styles.highScoreLabel}>{"👑" + Math.max(scoreState, highestScore)}</Text>
 		<SettingsButton></SettingsButton>
 	</>
 }

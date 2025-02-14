@@ -25,17 +25,21 @@ async function getHighScoreKeys(): Promise<HighScoreId[]> {
     return JSON.parse(value) as HighScoreId[];
 }
 
-export async function getHighScores(filterZeroes: boolean = true): Promise<HighScore[]> {
+export async function getHighScores(gameMode: GameModeType, filterZeroes: boolean = true, sort: boolean = true, limit: number = 0): Promise<HighScore[]> {
     const keys = await getHighScoreKeys();
-    const scores = [];
+    let scores = [];
     for (const key of keys) {
         const entry = await AsyncStorage.getItem(key);
         if (!entry)
             continue;
         const score = JSON.parse(entry) as HighScore;
-        if (!filterZeroes || score.score != 0)
+        if (gameMode == score.type && (!filterZeroes || score.score != 0))
             scores.push(score);
     }
+    if (sort)
+        scores.sort((a, b) => -(a.score - b.score))
+    if (limit > 0 && scores.length > limit)
+        scores = scores.splice(0, limit);
     return scores;
 }
 

@@ -1,7 +1,9 @@
 import { View } from "react-native";
 
-export default function SimplePopupView({children}: {children: any}) {
-    return <View style={{
+export default function SimplePopupView({children, style}: {children: any, style?: any[]}) {
+	if (style == undefined)
+		style = [];
+    return <View style={[{
 		width: '81%',
 		height: '70%',
 		backgroundColor: 'rgba(5, 5, 5, 0.95)',
@@ -13,6 +15,5 @@ export default function SimplePopupView({children}: {children: any}) {
 		position: 'absolute',
 		zIndex: 100,
         overflowY: 'scroll',
-        overflowX: 'hidden'
-	}}>{children}</View>
+	}, ...style]}>{children}</View>
 }

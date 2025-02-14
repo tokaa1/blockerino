@@ -17,7 +17,7 @@ export default function HighScores() {
         });
     }, [setHighScores])
 
-    return <SimplePopupView>
+    return <SimplePopupView style={[{justifyContent: 'flex-start'}]}>
         { highScores.length > 0 &&
             <>
                 <Text style={styles.subHeader}>

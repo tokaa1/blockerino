@@ -7,13 +7,17 @@ import { cssColors } from "@/constants/Color";
 import { GameModeType, useSetAppState } from "@/hooks/useAppState";
 
 export default function HighScores() {
-    const [ setAppState, appendAppState, popAppState ] = useSetAppState();
+    const [ setAppState, _appendAppState, popAppState ] = useSetAppState();
     const [ highScores, setHighScores ] = useState<HighScore[]>([]);
     const [ gameMode, setGameMode ] = useState(GameModeType.Classic);
     
     useEffect(() => {
         getHighScores().then((value) => {
-            setHighScores(value.sort((a, b) => -(a.score - b.score)));
+            value = value.sort((a, b) => -(a.score - b.score));
+            if (value.length > 10) {
+                value = value.slice(0, 10);
+            }
+            setHighScores(value);
         });
     }, [setHighScores])
 

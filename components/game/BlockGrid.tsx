@@ -1,21 +1,20 @@
 import {
 	Board,
 	BoardBlockType,
+	forEachBoardBlock,
 	GRID_BLOCK_SIZE,
-	HAND_BLOCK_SIZE,
 	HITBOX_SIZE,
 	PossibleBoardSpots,
 } from "@/constants/Board";
 import { colorToHex } from "@/constants/Color";
 import { Hand } from "@/constants/Hand";
 import {
-	PieceData,
 	createEmptyBlockStyle,
 	createFilledBlockStyle,
 } from "@/constants/Piece";
 import { useDroppable } from "@mgcrea/react-native-dnd";
 import { useEffect } from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet } from "react-native";
 import Animated, {
 	SharedValue,
 	runOnJS,
@@ -37,14 +36,11 @@ function encodeDndId(x: number, y: number): string {
 	return `${x},${y}`;
 }
 
-function createBlockStyle(
-	x: number,
-	y: number,
-	board: SharedValue<Board>,
-): any {
+function createBlockStyle(x: number, y: number, board: SharedValue<Board>): any {
 	const boardSize = board.value.length;
 	const loadBlockFlash = useSharedValue(0);
 
+	// start the load block flash
 	useEffect(() => {
 		if (board.value[y][x].blockType != BoardBlockType.EMPTY) 
 			return;
@@ -59,10 +55,11 @@ function createBlockStyle(
 				withDelay(downwardDelay, withTiming(0, { duration: step }))
 			)
 		);
-	});
+	}, [board.value]);
 
 	const animatedStyle = useAnimatedStyle(() => {
 		const block = board.value[y][x];
+		// do the load block flash if this block is empty
 		if (block.blockType == BoardBlockType.EMPTY && loadBlockFlash.value != 0) {
 			return {
 				...createFilledBlockStyle(block.color),
@@ -70,19 +67,13 @@ function createBlockStyle(
 			};
 		}
 
-		let style: any;
-		if (
-			block.blockType == BoardBlockType.FILLED ||
-			block.blockType == BoardBlockType.HOVERED
-		) {
+		let style: any = createEmptyBlockStyle();
+		if (block.blockType == BoardBlockType.FILLED || block.blockType == BoardBlockType.HOVERED) {
 			style = {
 				...createFilledBlockStyle(block.color),
 				opacity: block.blockType == BoardBlockType.HOVERED ? 0.3 : 1,
 			};
-		} else if (
-			block.blockType == BoardBlockType.HOVERED_BREAK_EMPTY ||
-			block.blockType == BoardBlockType.HOVERED_BREAK_FILLED
-		) {
+		} else if (block.blockType == BoardBlockType.HOVERED_BREAK_EMPTY || block.blockType == BoardBlockType.HOVERED_BREAK_FILLED) {
 			const blockColor =
 				block.blockType == BoardBlockType.HOVERED_BREAK_EMPTY
 					? block.color
@@ -91,8 +82,6 @@ function createBlockStyle(
 				...createFilledBlockStyle(blockColor),
 				boxShadow: '0px 0px 30px ' + colorToHex(blockColor)
 			};
-		} else {
-			style = createEmptyBlockStyle();
 		}
 
 		return style;
@@ -106,49 +95,30 @@ export default function BlockGrid({
 	draggingPiece,
 	hand
 }: BlockGridProps) {
-	const blocks = [];
+	const blockElements: any[] = [];
 	const boardLength = board.value.length;
-	for (let y = 0; y < boardLength; y++) {
-		for (let x = 0; x < boardLength; x++) {
-			const animatedStyle = createBlockStyle(x, y, board);
-			const blockPositionStyle = {
-				position: "absolute",
-				top: y * GRID_BLOCK_SIZE,
-				left: x * GRID_BLOCK_SIZE,
-			};
+	forEachBoardBlock(board.value, (_block, x, y) => {
+		const blockStyle = createBlockStyle(x, y, board);
+		const blockPositionStyle = {
+			position: "absolute",
+			top: y * GRID_BLOCK_SIZE,
+			left: x * GRID_BLOCK_SIZE,
+		};
 
-			// used to set the size of the droppable to 0 (pieces cannot be dropped on this block)
-			const createStyle = (possibleBoardDropSpots: PossibleBoardSpots) => {
-				"worklet";
-				const active = possibleBoardDropSpots[y][x] == 1;
-				if (active) {
-					return {
-						width: HITBOX_SIZE,
-						height: HITBOX_SIZE,
-					};
-				} else {
-					return {
-						width: 0,
-						height: 0,
-					};
-				}
-			};
-
-			blocks.push(
-				<Animated.View
-					key={`${x},${y}`}
-					style={[styles.emptyBlock, blockPositionStyle as any, animatedStyle]}
-				>
-					<BlockDroppable
-						id={encodeDndId(x, y)}
-						createStyle={createStyle}
-						style={styles.hitbox}
-						possibleBoardDropSpots={possibleBoardDropSpots}
-					></BlockDroppable>
-				</Animated.View>,
-			);
-		}
-	}
+		blockElements.push(
+			<Animated.View
+				key={`av${x},${y}`}
+				style={[styles.emptyBlock, blockPositionStyle as any, blockStyle]}
+			>
+				<BlockDroppable
+					x={x}
+					y={y}
+					style={styles.hitbox}
+					possibleBoardDropSpots={possibleBoardDropSpots}
+				></BlockDroppable>
+			</Animated.View>
+		);
+	});
 	
 	const gridStyle = useAnimatedStyle(() => {
 		let style: any;
@@ -175,27 +145,28 @@ export default function BlockGrid({
 				gridStyle
 			]}
 		>
-			{blocks}
+			{blockElements}
 		</Animated.View>
 	);
 }
 
 interface BlockDroppableProps {
 	children?: any;
-	id: string;
-	createStyle: (deps: PossibleBoardSpots) => object;
+	x: number;
+	y: number;
 	style: any;
 	possibleBoardDropSpots: SharedValue<PossibleBoardSpots>;
 }
 
 function BlockDroppable({
 	children,
-	id,
-	createStyle,
+	x,
+	y,
 	style,
 	possibleBoardDropSpots,
 	...otherProps
 }: BlockDroppableProps) {
+	const id = `${x},${y}`;
 	const { props, activeId } = useDroppable({
 		id,
 	});
@@ -216,9 +187,20 @@ function BlockDroppable({
 
 	const animatedStyle = useAnimatedStyle(() => {
 		runOnJS(updateLayout)();
-		const style = createStyle(possibleBoardDropSpots.value);
-		return style;
-	}, [props]);
+		const active = possibleBoardDropSpots.value[y][x] == 1;
+		if (active) {
+			// use a smaller size droppable than the block so that detection does not overlap with other blocks.
+			return {
+				width: HITBOX_SIZE,
+				height: HITBOX_SIZE,
+			};
+		} else {
+			return {
+				width: 0,
+				height: 0,
+			};
+		}
+	}, [props, possibleBoardDropSpots]);
 
 	return (
 		<Animated.View {...props} style={[style, animatedStyle]} {...otherProps}>

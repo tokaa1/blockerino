@@ -239,3 +239,12 @@ export function breakLines(board: Board): number {
 
   return count;
 }
+
+export function forEachBoardBlock(board: Board, each: ((block: BoardBlock, x: number, y: number) => boolean) | ((block: BoardBlock, x: number, y: number) => void)) {
+  const length = board.length;
+  for (let y = 0; y < length; y++) {
+    for (let x = 0; x < length; x++) {
+      each(board[y][x], x, y);
+    }
+  }
+}

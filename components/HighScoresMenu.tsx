@@ -18,6 +18,7 @@ export default function HighScores() {
     }, [gameMode, setHighScores]);
 
     return <SimplePopupView style={[{justifyContent: 'flex-start'}]}>
+        <StylizedButton text="Back" onClick={popAppState} backgroundColor={cssColors.spaceGray}></StylizedButton>
         { highScores.length > 0 &&
             <>
                 <Text style={styles.subHeader}>
@@ -51,7 +52,6 @@ export default function HighScores() {
                 }} backgroundColor={cssColors.pitchBlack} borderColor="white"></StylizedButton>
             </>
         }
-        <StylizedButton text="Back" onClick={popAppState} backgroundColor={cssColors.spaceGray}></StylizedButton>
     </SimplePopupView>
 }
 

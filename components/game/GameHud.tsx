@@ -6,6 +6,10 @@ import AnimatedNumbers from 'react-native-animated-numbers';
 import { Hand } from "@/constants/Hand";
 import { GameModeType, MenuStateType, useAppState } from "@/hooks/useAppState";
 import { getHighScores } from "@/constants/Storage";
+import { Color, colorLerp, colorToHex } from "@/constants/Color";
+
+const comboBarGoodColor: Color = {r: 0, g: 255, b: 0};
+const comboBarBadColor: Color = {r: 255, g: 51, b: 51};
 
 interface GameHudProps {
 	score: SharedValue<number>,
@@ -40,7 +44,8 @@ export function StatsGameHud({ score, combo, lastBrokenLine, hand}: GameHudProps
 					fontWeight: '100',
 					textShadowColor: 'rgb(0, 0, 0)',
 					textShadowOffset: { width: 3, height: 3 },
-					textShadowRadius: 10
+					textShadowRadius: 10,
+					alignSelf: 'center'
 				}}>{scoreText}</Text>
 			</View>
 			<ComboBar lastBrokenLine={lastBrokenLine} handSize={hand.value.length}></ComboBar>
@@ -54,21 +59,29 @@ interface ComboBarProps {
 };
 
 function ComboBar({ lastBrokenLine, handSize }: ComboBarProps) {
-	const width = useSharedValue(100);
+	const fillPercentage = useSharedValue(100);
+	const backgroundColor = useSharedValue(colorToHex(comboBarGoodColor));
 	
 	useAnimatedReaction(() => {
 		return lastBrokenLine.value
 	}, (current, previous) => {
-		width.value = withSpring((1 - lastBrokenLine.value / handSize) * 100, {
+		fillPercentage.value = withSpring((1 - lastBrokenLine.value / handSize) * 100, {
 			duration: 800
 		})
+	})
+
+	useAnimatedReaction(() => {
+		return fillPercentage.value;
+	}, (cur, prev) => {
+		backgroundColor.value = colorToHex(colorLerp(comboBarBadColor, comboBarGoodColor, fillPercentage.value / 100))
 	})
 	
 	const animatedStyle = useAnimatedStyle(() => {
 		return {
-			width: `${width.value}%`
+			width: `${fillPercentage.value}%`,
+			backgroundColor: backgroundColor.value
 		};
-	});
+	}, [fillPercentage]);
 
 	return (
 		<View style={styles.comboBarParent}>

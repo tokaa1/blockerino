@@ -36,7 +36,7 @@ export default function HighScores() {
                 </Text>
                 {
                     highScores.map((score, idx) => {
-                        return <Score key={idx} score={score}/>
+                        return <Score key={idx} rank={idx + 1} score={score}/>
                     })
                 }
             </>
@@ -55,9 +55,9 @@ export default function HighScores() {
     </SimplePopupView>
 }
 
-function Score({score}: {score: HighScore}) {
+function Score({score, rank}: {score: HighScore, rank: number}) {
     return <>
-        <Text style={styles.scoreValueText}>{String(score.score)}</Text>
+        <Text style={styles.scoreValueText}>{"#" + String(rank) + " - " + String(score.score)}</Text>
         <Text style={styles.scoreTimeText}>{createTimeAgoString(score.date)}</Text>
     </>
 }

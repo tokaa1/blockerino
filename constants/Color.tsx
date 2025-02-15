@@ -63,3 +63,10 @@ export function colorToHex(color: Color | null): string {
 
     return `#${toHex(color.r)}${toHex(color.g)}${toHex(color.b)}`;
 }
+
+export function colorLerp(a: Color, b: Color, t: number): Color {
+    const lerp = (a: number, b: number) => {
+        return a + (b - a) * t;
+    }
+    return {r: lerp(a.r, b.r), g: lerp(a.g, b.g), b: lerp(a.b, b.b)};
+}

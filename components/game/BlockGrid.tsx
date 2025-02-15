@@ -55,7 +55,7 @@ function createBlockStyle(x: number, y: number, board: SharedValue<Board>): any 
 				withDelay(downwardDelay, withTiming(0, { duration: step }))
 			)
 		);
-	}, [board.value]);
+	}, [board.value[y][x].blockType]);
 
 	const animatedStyle = useAnimatedStyle(() => {
 		const block = board.value[y][x];

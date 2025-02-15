@@ -1,15 +1,13 @@
-import { GRID_BLOCK_SIZE } from "@/constants/Board"
-import { useEffect, useRef, useState } from "react"
-import { Easing, Pressable, StyleSheet, Text, View } from "react-native"
-import Animated, { SharedValue, runOnJS, useAnimatedReaction, useAnimatedStyle, useDerivedValue, useSharedValue, withSpring, withTiming } from "react-native-reanimated"
-import AnimatedNumbers from 'react-native-animated-numbers';
+import { useEffect, useState } from "react"
+import { Pressable, StyleSheet, Text, View } from "react-native"
+import Animated, { SharedValue, interpolateColor, runOnJS, useAnimatedReaction, useAnimatedStyle, useSharedValue, withDelay, withRepeat, withSequence, withSpring, withTiming } from "react-native-reanimated"
 import { Hand } from "@/constants/Hand";
 import { GameModeType, MenuStateType, useAppState } from "@/hooks/useAppState";
 import { getHighScores } from "@/constants/Storage";
 import { Color, colorLerp, colorToHex } from "@/constants/Color";
 
-const comboBarGoodColor: Color = {r: 0, g: 255, b: 0};
-const comboBarBadColor: Color = {r: 255, g: 51, b: 51};
+const comboBarGoodColor = colorToHex({r: 0, g: 255, b: 0});
+const comboBarBadColor = colorToHex({r: 255, g: 51, b: 51});
 
 interface GameHudProps {
 	score: SharedValue<number>,
@@ -30,7 +28,7 @@ export function StatsGameHud({ score, combo, lastBrokenLine, hand}: GameHudProps
 	
 	useAnimatedReaction(() => {
 		return scoreAnimValue.value
-	}, (current, prev) => {
+	}, (current, _prev) => {
 		runOnJS(setScoreText)(String(Math.floor(current)));
 	})
 
@@ -60,26 +58,27 @@ interface ComboBarProps {
 
 function ComboBar({ lastBrokenLine, handSize }: ComboBarProps) {
 	const fillPercentage = useSharedValue(100);
-	const backgroundColor = useSharedValue(colorToHex(comboBarGoodColor));
 	
 	useAnimatedReaction(() => {
 		return lastBrokenLine.value
-	}, (current, previous) => {
+	}, (_cur, _prev) => {
+		'worklet';
 		fillPercentage.value = withSpring((1 - lastBrokenLine.value / handSize) * 100, {
-			duration: 800
+			duration: 800,
+			overshootClamping: true
 		})
 	})
-
-	useAnimatedReaction(() => {
-		return fillPercentage.value;
-	}, (cur, prev) => {
-		backgroundColor.value = colorToHex(colorLerp(comboBarBadColor, comboBarGoodColor, fillPercentage.value / 100))
-	})
-	
 	const animatedStyle = useAnimatedStyle(() => {
 		return {
 			width: `${fillPercentage.value}%`,
-			backgroundColor: backgroundColor.value
+			backgroundColor: interpolateColor(fillPercentage.value / 100, [0, 1/5, 1], ['transparent', comboBarBadColor, comboBarGoodColor]),
+			transform: [
+				{
+					scale: lastBrokenLine.value == handSize - 1 ? withRepeat(
+						withDelay(500, withRepeat(withSequence(withTiming(1.1), withTiming(1)), 2))
+					, 1000) : 1
+				}
+			]
 		};
 	}, [fillPercentage]);
 
@@ -152,7 +151,7 @@ const styles = StyleSheet.create({
 		left: 50
 	},
 	hudContainer: {
-		width: '100%',//GRID_BLOCK_SIZE * BOARD_LENGTH + 8,
+		width: '100%',
 		height: 120,
 		justifyContent: 'center',
 		alignItems: 'center',

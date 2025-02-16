@@ -57,5 +57,7 @@ const styles = StyleSheet.create({
 		backgroundColor: "black",
 		alignItems: "center",
 		justifyContent: "center",
+		width: '100%',
+		height: '100%'
 	}
 });

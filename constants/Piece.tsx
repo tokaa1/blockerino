@@ -315,12 +315,12 @@ function getBorderColors(backgroundColor: Color) {
 	};
 }
 
-export function createFilledBlockStyle(color: Color): object {
+export function createFilledBlockStyle(color: Color, borderWidth: number = 7): object {
 	"worklet";
 	return {
 		backgroundColor: colorToHex(color), //'rgb(131, 83, 203)'
 		...getBorderColors(color),
-		borderWidth: 7,
+		borderWidth: borderWidth,
 		boxSizing: 'border-box',
 		boxShadow: 'none',
 		shadowOpacity: 0,

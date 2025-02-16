@@ -8,6 +8,7 @@ import {
 } from "@/constants/Board";
 import { colorToHex } from "@/constants/Color";
 import { Hand } from "@/constants/Hand";
+import { randomWithRange } from "@/constants/Math";
 import {
 	createEmptyBlockStyle,
 	createFilledBlockStyle,
@@ -18,6 +19,7 @@ import { StyleSheet } from "react-native";
 import Animated, {
 	SharedValue,
 	runOnJS,
+	useAnimatedReaction,
 	useAnimatedStyle,
 	useSharedValue,
 	withDelay,
@@ -37,56 +39,104 @@ function encodeDndId(x: number, y: number): string {
 }
 
 function createBlockStyle(x: number, y: number, board: SharedValue<Board>): any {
-	const boardSize = board.value.length;
-	const loadBlockFlash = useSharedValue(0);
+    const boardSize = board.value.length;
+    const loadBlockFlash = useSharedValue(0);
+    const placedBlockFall = useSharedValue(0);
+    const placedBlockDirectionX = useSharedValue(0);
+    const placedBlockDirectionY = useSharedValue(0);
+    const placedBlockRotation = useSharedValue(0);
 
-	// start the load block flash
-	useEffect(() => {
-		if (board.value[y][x].blockType != BoardBlockType.EMPTY) 
-			return;
-		const step = 70;
-		const upwardDelay = (boardSize - 1 - y) * step;
-		const downwardDelay = 2 * y * step;
-		
-		loadBlockFlash.value = withDelay(
-			upwardDelay,
-			withSequence(
-				withTiming(1, { duration: step }),
-				withDelay(downwardDelay, withTiming(0, { duration: step }))
-			)
+    useAnimatedReaction(() => {
+        return board.value[y][x].blockType
+    }, (cur, prev) => {
+        if (cur == BoardBlockType.EMPTY && (prev == BoardBlockType.FILLED || prev == BoardBlockType.HOVERED_BREAK_EMPTY || prev == BoardBlockType.HOVERED_BREAK_FILLED)) {
+            const angle = Math.random() * Math.PI * 2;
+            const distance = 200;
+            const rotation = (Math.random() - 0.5) * Math.PI * 2;
+            
+            placedBlockDirectionX.value = Math.cos(angle) * distance;
+            placedBlockDirectionY.value = Math.sin(angle) * distance;
+            placedBlockRotation.value = rotation;
+            
+            placedBlockFall.value = withTiming(1, { 
+                duration: 500 
+            }, (finished) => {
+                'worklet';
+                if (finished) {
+                    placedBlockFall.value = 0;
+                }
+            });
+        }
+    });
+
+    useEffect(() => {
+        if (board.value[y][x].blockType != BoardBlockType.EMPTY) 
+            return;
+        const step = 70;
+        const upwardDelay = (boardSize - 1 - y) * step;
+        const downwardDelay = 2 * y * step;
+        
+        loadBlockFlash.value = withDelay(
+            upwardDelay,
+            withSequence(
+                withTiming(1, { duration: step }),
+                withDelay(downwardDelay, withTiming(0, { duration: step }))
+            )
 		);
-	}, [board.value[y][x].blockType]);
+    }, [board.value[y][x].blockType]);
 
-	const animatedStyle = useAnimatedStyle(() => {
-		const block = board.value[y][x];
-		// do the load block flash if this block is empty
-		if (block.blockType == BoardBlockType.EMPTY && loadBlockFlash.value != 0) {
-			return {
-				...createFilledBlockStyle(block.color),
-				opacity: Math.min(1, loadBlockFlash.value * 10),
-			};
-		}
+    const animatedStyle = useAnimatedStyle(() => {
+        const block = board.value[y][x];
+        
+        if (block.blockType == BoardBlockType.EMPTY && loadBlockFlash.value != 0) {
+            return {
+                ...createFilledBlockStyle(block.color),
+                opacity: Math.min(1, loadBlockFlash.value * 10),
+            };
+        }
 
-		let style: any = createEmptyBlockStyle();
-		if (block.blockType == BoardBlockType.FILLED || block.blockType == BoardBlockType.HOVERED) {
-			style = {
-				...createFilledBlockStyle(block.color),
-				opacity: block.blockType == BoardBlockType.HOVERED ? 0.3 : 1,
-			};
-		} else if (block.blockType == BoardBlockType.HOVERED_BREAK_EMPTY || block.blockType == BoardBlockType.HOVERED_BREAK_FILLED) {
-			const blockColor =
-				block.blockType == BoardBlockType.HOVERED_BREAK_EMPTY
-					? block.color
-					: block.hoveredBreakColor;
-			style = {
-				...createFilledBlockStyle(blockColor),
-				boxShadow: '0px 0px 30px ' + colorToHex(blockColor)
-			};
-		}
+        if (placedBlockFall.value > 0) {
+            let progress = placedBlockFall.value;
+			progress = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);// easeOutCirc
+            return {
+                ...createFilledBlockStyle(block.color),
+                opacity: 1 - progress,
+                transform: [
+                    { scale: 1 - progress },
+                    { 
+                        translateX: placedBlockDirectionX.value * progress 
+                    },
+                    { 
+                        translateY: placedBlockDirectionY.value * progress 
+                    },
+                    { 
+                        rotate: `${placedBlockRotation.value * progress}rad` 
+                    }
+                ]
+            }
+        }
 
-		return style;
-	});
-	return animatedStyle;
+        let style: any = createEmptyBlockStyle();
+        if (block.blockType == BoardBlockType.FILLED || block.blockType == BoardBlockType.HOVERED) {
+            style = {
+                ...createFilledBlockStyle(block.color),
+                opacity: block.blockType == BoardBlockType.HOVERED ? 0.3 : 1,
+            };
+        } else if (block.blockType == BoardBlockType.HOVERED_BREAK_EMPTY || block.blockType == BoardBlockType.HOVERED_BREAK_FILLED) {
+            const blockColor =
+                block.blockType == BoardBlockType.HOVERED_BREAK_EMPTY
+                    ? block.color
+                    : block.hoveredBreakColor;
+            style = {
+                ...createFilledBlockStyle(blockColor),
+                boxShadow: '0px 0px 30px ' + colorToHex(blockColor)
+            };
+        }
+
+        return {...style, transform: []};
+    });
+    
+    return animatedStyle;
 }
 
 export default function BlockGrid({

@@ -1,15 +1,51 @@
 import { useAtom, useSetAtom } from "jotai";
 import { useEffect } from "react";
-import { Pressable, StyleSheet, Text } from "react-native";
-import Animated, { BounceInUp, Easing, FadeIn, useAnimatedStyle, useDerivedValue, useSharedValue, withDelay, withRepeat, withSequence, withSpring, withTiming } from "react-native-reanimated";
+import { Pressable, StyleSheet, Text, View, ViewStyle } from "react-native";
+import Animated, { BounceInUp, Easing, FadeIn, interpolateColor, useAnimatedStyle, useDerivedValue, useSharedValue, withDelay, withRepeat, withSequence, withSpring, withTiming } from "react-native-reanimated";
 import { MenuStateType, useSetAppState } from "@/hooks/useAppState";
 import { cssColors } from "@/constants/Color";
 import { GameModeType } from '@/hooks/useAppState';
+import HighScores from "./HighScoresMenu";
+import { PieceData } from "@/constants/Piece";
+import { PieceView } from "./PieceView";
+
+const logoBPiece: PieceData = {
+	matrix: [
+		[1, 1, 1, 0],
+		[1, 0, 0, 1],
+		[1, 1, 1, 0],
+		[1, 0, 0, 1],
+		[1, 1, 1, 0]
+	],
+	distributionPoints: 0,
+	color: { r: 255, g: 51, b: 90 }
+};
+const logoNPiece: PieceData = {
+	matrix: [
+		[1, 1, 1, 1],
+		[1, 0, 0, 1],
+		[1, 0, 0, 1],
+		[1, 0, 0, 1]
+	],
+	distributionPoints: 0,
+	color: { r: 255, g: 0, b: 255 }
+};
+
+function BlockerinoLogo({blockSize, style}: {blockSize: number, style: ViewStyle}) {
+	const nTop = blockSize * 80/30
+	const nLeft = blockSize * 50/30
+	return <View style={[{width: blockSize * 4 + nLeft, height: blockSize * 4 + nTop}, style]}>
+		<PieceView style={{boxShadow: '5px 5px 50px #000000', backgroundColor: 'rgba(0, 0, 0, 0.6)'}} piece={logoBPiece} blockSize={blockSize}></PieceView>
+		<PieceView style={{transform: [{ translateX: nLeft }, { translateY: nTop }], position: 'absolute', zIndex: -1}} piece={logoNPiece} blockSize={blockSize}></PieceView>
+	</View>
+}
 
 export default function MainMenu() {
 	const [ _, appendAppState ] = useSetAppState();
 	
-	return <>
+	return <View style={styles.container}>
+
+		<BlockerinoLogo style={{position: 'absolute', bottom: 10, left: 10}} blockSize={5}></BlockerinoLogo>
 		<Animated.Text entering={BounceInUp.duration(800)} style={[styles.logo]}>
 			blockerino
 		</Animated.Text>
@@ -44,7 +80,7 @@ export default function MainMenu() {
 		<Animated.Text entering={FadeIn} style={styles.footer}>
 			beta version
 		</Animated.Text>
-	</>
+	</View>
 }
 
 function MainButton({
@@ -80,7 +116,7 @@ function MainButton({
 				{ translateY: translateY.value },
 				{ rotate: `${rotationDeg.value}deg` },
 				{ scale: scale.value }
-			],
+			]
 		};
 	});
 
@@ -162,9 +198,10 @@ function MainButton({
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: "black",
 		alignItems: "center",
 		justifyContent: "center",
+		width: '100%',
+		height: '100%'
 	},
 	logo: {
 		fontFamily: "Silkscreen",
@@ -175,12 +212,12 @@ const styles = StyleSheet.create({
 	},
 	button: {
 		width: "100%",
-		height: 60,
+		height: "100%",
 		justifyContent: "center",
 		alignItems: "center",
 		marginBottom: 20,
-		borderRadius: 10,
-		maxWidth: 420,
+		borderRadius: 8,
+		borderWidth: 2
 	},
 	buttonPressable: {
 		width: "80%",
@@ -189,17 +226,19 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		marginBottom: 20,
 		borderRadius: 10,
-		maxWidth: 420,
+		maxWidth: 420
 	},
 	buttonText: {
 		fontFamily: "Silkscreen",
 		fontSize: 24,
 		color: "black",
+		textAlign: 'center'
 	},
 	buttonFlavorText: {
 		fontFamily: "Silkscreen",
 		fontSize: 14,
 		color: "rgb(30, 30, 30)",
+		textAlign: 'center'
 	},
 	footer: {
 		fontFamily: "Silkscreen",

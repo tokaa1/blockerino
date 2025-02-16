@@ -1,8 +1,9 @@
-import { getRandomPiece, createFilledBlockStyle } from "@/constants/Piece";
+import { getRandomPiece, createFilledBlockStyle, PieceData } from "@/constants/Piece";
 import React from "react";
 import { useEffect, useState } from "react";
 import { Dimensions, View } from "react-native";
 import Animated, { useSharedValue, withRepeat, withSequence, withDelay, withTiming, useAnimatedStyle } from "react-native-reanimated";
+import { PieceView } from "./PieceView";
 
 function PieceParticleComponent() {
     const [{width, height}, setWindowDimensions] = useState(Dimensions.get('window'));
@@ -63,47 +64,19 @@ function PieceParticleComponent() {
         ],
     }));
 
-    const particleBlockSize = 28;
-    const piece = getRandomPiece();
-    const pieceHeight = piece.matrix.length;
-    const pieceWidth = piece.matrix[0].length;
-    const pieceBlocks = [];
-
-    for (let y = 0; y < pieceHeight; y++) {
-        for (let x = 0; x < pieceWidth; x++) {
-            if (piece.matrix[y][x] == 1) {
-                const blockStyle = {
-                    width: particleBlockSize,
-                    height: particleBlockSize,
-                    top: y * particleBlockSize,
-                    left: x * particleBlockSize,
-                    position: "absolute",
-                    opacity: 0.8,
-                };
-                pieceBlocks.push(
-                    <View
-                        key={`${x},${y}`}
-                        style={[createFilledBlockStyle(piece.color), blockStyle]}
-                    ></View>,
-                );
-            }
-        }
-    }
 
     return (
         <Animated.View
             style={[
                 {
                     position: "absolute",
-                    width: particleBlockSize * pieceWidth,
-                    height: particleBlockSize * pieceHeight,
                     left: randomX,
                     top: randomY,
                 },
                 animatedStyle,
             ]}
         >
-            {pieceBlocks}
+            <PieceView piece={getRandomPiece()} blockSize={28}></PieceView>
         </Animated.View>
     );
 }

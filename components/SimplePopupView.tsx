@@ -5,7 +5,7 @@ export default function SimplePopupView({children, style}: {children: any, style
 		style = [];
     return <View style={[{
 		width: '81%',
-		height: '70%',
+		height: '71%',
 		backgroundColor: 'rgba(5, 5, 5, 0.95)',
 		borderRadius: 20,
 		borderColor: 'rgb(90, 90, 90)',
@@ -15,5 +15,6 @@ export default function SimplePopupView({children, style}: {children: any, style
 		position: 'absolute',
 		zIndex: 100,
         overflowY: 'scroll',
+		boxSizing: 'border-box'
 	}, ...style]}>{children}</View>
 }
